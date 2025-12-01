@@ -1,0 +1,404 @@
+<!-- START OF CUSTOM BLOCK 1-->
+ <style>
+/* ==== GLOBAL / GHL OVERRIDES ==== */
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow-x: hidden;
+  background:
+    radial-gradient(1200px 600px at 10% 10%, rgba(24,164,255,.22), transparent 60%),
+    radial-gradient(1000px 600px at 80% 20%, rgba(34,211,163,.18), transparent 60%),
+    linear-gradient(180deg,#0f172a 0%, #0b1220 100%) !important;
+  color:#fff !important;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+}
+
+/* kill GHL whitespaces */
+section, .section, .row, .wrapper, .container,
+[data-element="section"], [data-element="row"] {
+  background:transparent !important;
+}
+
+/* HERO */
+.hero{
+  min-height:100vh;
+  padding:90px 20px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+.hero h1{
+  font-size:48px;
+  font-weight:900;
+  margin-bottom:10px;
+}
+.hero p.sub{
+  color:rgba(255,255,255,.9);
+  font-size:18px;
+  margin-bottom:32px;
+  max-width:800px;
+}
+
+/* TOTAL FUNDING BOX */
+.range-box{
+  display:inline-block;
+  background:linear-gradient(90deg,#38bdf8,#5b7cfa);
+  padding:16px 34px;
+  border-radius:16px;
+  font-weight:900;
+  font-size:24px;
+  margin-bottom:26px;
+  color:#fff!important;
+  box-shadow:0 10px 30px rgba(56,189,248,.5);
+  transition:box-shadow .4s ease;
+}
+
+/* FUNDING GRID */
+.funding-grid{
+  display:flex;
+  flex-wrap:wrap;
+  gap:18px;
+  justify-content:center;
+  margin-bottom:30px;
+}
+.fund-card{
+  background:rgba(15,23,42,.88);
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:14px;
+  padding:18px 26px;
+  min-width:220px;
+  box-shadow:0 10px 28px rgba(0,0,0,.55);
+  transition:box-shadow .4s ease;
+}
+.fund-card h2{
+  margin:0 0 6px;
+  font-size:18px;
+  font-weight:700;
+  color:rgba(255,255,255,.82);
+}
+.fund-card p{
+  margin:0;
+  font-size:22px;
+  font-weight:900;
+  color:#fff;
+}
+
+/* METRIC CARDS */
+.cards{
+  display:flex;
+  flex-wrap:wrap;
+  gap:18px;
+  justify-content:center;
+  margin-bottom:36px;
+}
+.card{
+  background:rgba(15,23,42,.80);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
+  padding:18px 24px;
+  min-width:160px;
+  box-shadow:0 8px 24px rgba(0,0,0,.45);
+}
+.card h3{margin:0;font-size:20px;color:rgba(255,255,255,.7);}
+.card p{margin:6px 0 0;font-size:15px;color:#fff;}
+
+/* CTA */
+.btn{
+  background:linear-gradient(135deg,#5b7cfa,#38bdf8);
+  padding:16px 38px;
+  border-radius:12px;
+  font-weight:800;
+  font-size:18px;
+  color:#fff!important;
+  text-decoration:none;
+  box-shadow:0 10px 24px rgba(24,164,255,.4);
+  display:inline-block;
+  margin-top:4px;
+}
+.btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 14px 32px rgba(24,164,255,.55);
+}
+
+/* OPTIMIZATION SECTION */
+.opt-section{
+  margin-top:40px;
+  max-width:760px;
+  text-align:left;
+  box-shadow: 0 10px 28px rgba(0,0,0,.55);
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(15,23,42,.88);
+  border-radius: 14px;
+  padding: 18px 26px;
+  min-width: 220px;
+  transition: box-shadow .4s ease;
+}
+.opt-section h2{
+  font-size:20px;
+  margin:0 0 10px;
+  font-weight:800;
+}
+.opt-section ul{
+  margin:0;
+  padding-left:20px;
+  font-size:14px;
+  color:rgba(255,255,255,.9);
+}
+.opt-section li{
+  margin-bottom:6px;
+}
+.opt-note{
+  margin-top:10px;
+  font-size:13px;
+  color:rgba(226,232,240,.9);
+}
+
+.footerNote{
+  margin-top:26px;
+  color:rgba(248,250,252,.75);
+  font-size:13px;
+}
+
+/* MONEY FALL LAYER */
+#moneyLayer {
+  position: fixed;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999999;
+}
+</style>
+
+<!-- MONEY FALLING LAYER -->
+<div id="moneyLayer"></div>
+
+<section class="hero">
+  <h1>💸 Congratulations — You’re Fundable!</h1>
+  <p class="sub">
+    Underwrite IQ™ reviewed your credit report and calculated your real funding approvals.
+  </p>
+
+  <div class="range-box" id="totalVal">Total Funding Approved: $0</div>
+
+  <div class="funding-grid">
+    <div class="fund-card">
+      <h2>Personal Funding Approved</h2>
+      <p id="personalVal">$0</p>
+    </div>
+
+    <div class="fund-card">
+      <h2>Business Funding Approved</h2>
+      <p id="businessVal">$0</p>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card"><h3>Score</h3><p id="scoreCardVal">--</p></div>
+    <div class="card"><h3>Utilization</h3><p id="utilCardVal">--%</p></div>
+    <div class="card"><h3>Inquiries</h3><p id="inqCardVal">EX 0 • TU 0 • EQ 0</p></div>
+  </div>
+
+  <a class="btn" href="https://fundhub.ai/funding-form-748297">Book Your Funding Review</a>
+
+  <div class="opt-section">
+    <h2>How to Unlock Even More Funding</h2>
+    <ul id="optList"></ul>
+    <p class="opt-note">
+      We’ll walk you through these steps on your Funding Review call so you can safely push your limits higher.
+    </p>
+  </div>
+
+  <div class="footerNote">
+    Your complete Funding Plan has been emailed to you.
+  </div>
+</section>
+<!-- END OF CUSTOM BLOCK 1 -->
+<!--START OF CUSTOM BLOCK 2-->
+<script>
+(function(){
+
+  /* ===========================
+      HELPERS
+  ============================ */
+  const params = new URLSearchParams(window.location.search);
+
+  const getNum = (v)=>{
+    if(v==null) return 0;
+    const n = Number(String(v).replace(/[^\d.-]/g,""));
+    return Number.isFinite(n)?n:0;
+  };
+
+  /* ===========================
+      ELEMENTS
+  ============================ */
+  const personalEl = document.getElementById("personalVal");
+  const businessEl = document.getElementById("businessVal");
+  const totalEl    = document.getElementById("totalVal");
+
+  const ctaBtn = document.querySelector(".btn, .button, #ctaButton");
+
+  const scoreEl = document.getElementById("scoreCardVal");
+  const utilEl  = document.getElementById("utilCardVal");
+  const inqEl   = document.getElementById("inqCardVal");
+  const optList = document.getElementById("optList");
+
+  /* ===========================
+      FUNDING VALUES (FIXED)
+      Using redirect.query fields:
+      - personalTotal
+      - businessTotal
+      - totalCombined
+  ============================ */
+  const personalFromUrl = getNum(params.get("personalTotal"));
+  const businessFromUrl = getNum(params.get("businessTotal"));
+  const combinedFromUrl = getNum(params.get("totalCombined"));
+
+  const USE_MOCK = (!personalFromUrl && !businessFromUrl && !combinedFromUrl);
+
+  const personalTarget = USE_MOCK ? 45000 : personalFromUrl;
+  const businessTarget = USE_MOCK ? 90000 : businessFromUrl;
+  const totalTarget    = USE_MOCK ? 135000 : (combinedFromUrl || (personalTarget + businessTarget));
+
+  /* ===========================
+      COUNTERS
+  ============================ */
+  function animateCounter(el, end, duration){
+    duration = duration * 1.2;
+
+    return new Promise(resolve=>{
+      if(!el) return resolve();
+      const startTime = performance.now();
+
+      function tick(now){
+        const p = Math.min((now-startTime)/duration, 1);
+        const eased = 1 - Math.pow(1-p, 3);
+        el.textContent = "$" + Math.floor(end * eased).toLocaleString();
+
+        if(p < 1) requestAnimationFrame(tick);
+        else resolve();
+      }
+
+      requestAnimationFrame(tick);
+    });
+  }
+
+  function animateTotal(end, duration){
+    duration = duration * 1.2;
+
+    return new Promise(resolve=>{
+      const startTime = performance.now();
+
+      function tick(now){
+        const p = Math.min((now-startTime)/duration, 1);
+        const eased = 1 - Math.pow(1-p, 3);
+        const val = Math.floor(end * eased).toLocaleString();
+
+        totalEl.textContent = "Total Funding Approved: $" + val;
+
+        if(p < 1) requestAnimationFrame(tick);
+        else resolve();
+      }
+
+      requestAnimationFrame(tick);
+    });
+  }
+
+  /* ===========================
+      GLOW BURST
+  ============================ */
+  function glowBurst(el){
+    if(!el) return;
+
+    const burstDuration = 430;
+
+    el.style.transition = `box-shadow ${burstDuration}ms ease`;
+    el.style.boxShadow = "0 0 48px rgba(56,189,248,1)";
+
+    setTimeout(()=>{
+      el.style.boxShadow = "";
+    }, burstDuration);
+  }
+
+  /* ===========================
+      CTA BREATH
+  ============================ */
+  function startCTABreath(){
+    if(!ctaBtn) return;
+
+    let glow = 6;
+    let dir  = 1;
+
+    setInterval(()=>{
+      glow += dir * 0.25;
+
+      if(glow > 11) dir = -1;
+      if(glow < 5)  dir = 1;
+
+      ctaBtn.style.boxShadow = `0 0 ${glow}px rgba(56,189,248,0.55)`;
+    }, 60);
+  }
+
+  /* ===========================
+      SCORE / UTIL / INQ
+  ============================ */
+  if(scoreEl) scoreEl.textContent = params.get("score") || "--";
+  if(utilEl)  utilEl.textContent  = (getNum(params.get("util"))||0) + "%";
+  if(inqEl){
+    inqEl.textContent =
+      `EX ${params.get("inqEx")||0} • TU ${params.get("inqTu")||0} • EQ ${params.get("inqEq")||0}`;
+  }
+
+  /* ===========================
+      OPTIMIZATION LIST
+  ============================ */
+  (function(){
+    if (!optList) return;
+
+    const util = getNum(params.get("util"));
+    const neg  = getNum(params.get("neg"));
+    const late = getNum(params.get("late"));
+    const ex = getNum(params.get("inqEx"));
+    const tu = getNum(params.get("inqTu"));
+    const eq = getNum(params.get("inqEq"));
+    const inqTotal = ex + tu + eq;
+
+    const items = [];
+
+    if(util > 30)
+      items.push(`Your utilization is ${util}%. Pay cards toward 30% for higher approvals.`);
+    if(neg > 0)
+      items.push(`${neg} negative tradeline${neg===1?"":"s"} detected.`);
+    if(late > 0)
+      items.push(`${late} late payment${late===1?"":"s"} found.`);
+    if(inqTotal > 0)
+      items.push(`${inqTotal} recent inquiry${inqTotal===1?"":"ies"}.`);
+
+    items.push("Multiple addresses/employers will be cleaned to avoid lender flags.");
+
+    optList.innerHTML = items.map(i=>`<li>${i}</li>`).join("");
+  })();
+
+  /* ===========================
+      RUN SEQUENCE
+  ============================ */
+  async function run(){
+    totalEl.textContent = "Total Funding Approved: $0";
+
+    animateCounter(personalEl, personalTarget, 1300);
+    animateCounter(businessEl, businessTarget, 1300);
+
+    await animateTotal(totalTarget, 1500);
+    glowBurst(totalEl);
+
+    setTimeout(startCTABreath, 700);
+  }
+
+  run();
+
+})();
+</script>
+<!-- END OF CUSTOM BLOCK 2 -->

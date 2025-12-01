@@ -1,0 +1,402 @@
+<!-- START OF CUSTOM BLOCK 1-->
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fix My Credit | FundHub</title>
+
+<style>
+/* ————————————————————————————————
+   BASE
+——————————————————————————————— */
+body{
+  margin:0;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+  background:#f8fafc;
+  color:#0f172a;
+}
+.hero{
+  background:linear-gradient(180deg,#ffffff 0%,#ebf8ff 100%);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:100px 20px;
+  position:relative;
+  overflow:hidden;
+}
+
+/* ————————————————————————————————
+   MOBILE ORDER FIXING
+——————————————————————————————— */
+.cards{ order:1; }
+#ctaButton{ order:2; }
+#fundBox{ order:3; }
+#fixBox{ order:4; }
+.footerNote{ order:5; }
+
+@media(max-width:600px){
+  .hero{ padding:50px 20px; }
+  .cards{ order:3; }
+  #ctaButton{ order:2; margin:40px 0; }
+  #fundBox{ order:1; }
+  #fixBox{ order:4; }
+  .footerNote{ order:5; }
+}
+
+/* ————————————————————————————————
+   TYPOGRAPHY & CARDS
+——————————————————————————————— */
+h1{
+  font-size:44px;
+  font-weight:900;
+  margin-bottom:12px;
+}
+p.sub{
+  color:#475569;
+  font-size:18px;
+  margin-bottom:32px;
+  max-width:720px;
+}
+.cards{
+  display:flex;
+  flex-wrap:wrap;
+  gap:18px;
+  justify-content:center;
+  margin-bottom:40px;
+}
+.card{
+  background:#fff;
+  border:1px solid #e2e8f0;
+  border-radius:12px;
+  padding:18px 24px;
+  min-width:160px;
+  box-shadow:0 6px 20px rgba(0,0,0,.08);
+}
+.card h3{ margin:0; font-size:22px; }
+.card p{ margin:6px 0 0; font-size:15px; color:#475569; }
+
+/* ————————————————————————————————
+   CTA BUTTON
+——————————————————————————————— */
+.btn{
+  background:linear-gradient(135deg,#5b7cfa,#38bdf8);
+  color:#fff;
+  text-decoration:none;
+  font-weight:800;
+  padding:16px 38px;
+  border-radius:12px;
+  font-size:18px;
+  box-shadow:0 8px 20px rgba(24,164,255,.25);
+  display:inline-block;
+}
+.btn:hover{
+  transform:translateY(-3px);
+  box-shadow:0 14px 32px rgba(24,164,255,.4);
+}
+
+/* ————————————————————————————————
+   FOOTER
+——————————————————————————————— */
+.footerNote{
+  margin-top:40px;
+  color:#475569;
+  font-size:15px;
+}
+
+/* Pulse bar */
+.pulse{
+  position:absolute;
+  bottom:0;
+  left:0;
+  height:6px;
+  width:0;
+  background:linear-gradient(90deg,#5b7cfa,#38bdf8);
+  animation:pulsebar 3s infinite;
+}
+@keyframes pulsebar{
+  0%{width:0;opacity:.2}
+  50%{width:80%;opacity:1}
+  100%{width:0;opacity:.2}
+}
+
+/* ————————————————————————————————
+   FUNDING BOX
+——————————————————————————————— */
+.fundBox{
+  background:#fff;
+  border-radius:24px;
+  padding:32px 28px;
+  margin-top:40px;
+  max-width:880px;
+  width:100%;
+  box-shadow:0 6px 24px rgba(15,23,42,.08);
+  border:1px solid #e2e8f0;
+  text-align:center;
+}
+.fundGrid{
+  display:flex;
+  gap:18px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-top:24px;
+}
+.fundCell{
+  background:#f8fafc;
+  border-radius:18px;
+  padding:22px 26px;
+  min-width:220px;
+  border:1px solid #e2e8f0;
+}
+.fundCell h4{
+  margin:0 0 8px;
+  font-size:18px;
+  font-weight:700;
+  color:#64748b;
+}
+.fundCell .amt{
+  font-size:32px;
+  font-weight:900;
+  color:#0f172a;
+}
+#totalLine{
+  margin-top:22px;
+  font-size:22px;
+  font-weight:900;
+  color:#0f172a;
+}
+
+/* ————————————————————————————————
+   FIX LIST BOX
+——————————————————————————————— */
+.fixBox{
+  background:#fff;
+  border-radius:24px;
+  padding:26px 26px 30px;
+  margin-top:26px;
+  max-width:880px;
+  width:100%;
+  box-shadow:0 6px 24px rgba(15,23,42,.05);
+  border:1px solid #e2e8f0;
+  text-align:left;
+}
+.fixBox h3{
+  text-align:center;
+  margin-top:0;
+  margin-bottom:12px;
+}
+#tipsList{
+  max-width:720px;
+  margin:0 auto;
+  padding-left:20px;
+  color:#475569;
+  font-size:16px;
+  line-height:1.6;
+}
+
+/* CTA breathing */
+.btn.cta-breathe{
+  animation:ctaBreathe 2.4s ease-in-out infinite;
+}
+@keyframes ctaBreathe{
+  0%  {box-shadow:0 8px 20px rgba(24,164,255,.25); transform:translateY(0);}
+  50% {box-shadow:0 12px 28px rgba(24,164,255,.40); transform:translateY(-1px);}
+  100%{box-shadow:0 8px 20px rgba(24,164,255,.25); transform:translateY(0);}
+}
+</style>
+</head>
+
+<body>
+<section class="hero">
+  <h1>You're Closer Than You Think.</h1>
+  <p class="sub">
+    Underwrite IQ™ found a few items holding you back — here’s what we found and how to fix it fast.
+  </p>
+
+  <div class="cards">
+    <div class="card">
+      <h3>Negative Items</h3>
+      <p id="collectionsVal">0 items flagged for removal</p>
+    </div>
+    <div class="card">
+      <h3>Late Payments</h3>
+      <p id="lateVal">0 accounts to correct</p>
+    </div>
+    <div class="card">
+      <h3>Score Potential</h3>
+      <p id="scoreVal">Score: --</p>
+    </div>
+  </div>
+
+  <a class="btn" id="ctaButton" href="https://fundhub.ai/repair-survey-842022" target="_blank">
+    Fix My Credit Now
+  </a>
+
+  <div class="fundBox" id="fundBox">
+    <h2 style="font-size:28px;font-weight:900;margin-bottom:6px;">
+      Your Funding Potential After Credit Repair
+    </h2>
+    <p style="color:#64748b;margin-bottom:20px;font-size:15px;">
+      This is what you can realistically unlock once these items are cleaned up.
+    </p>
+
+    <div class="fundGrid">
+      <div class="fundCell">
+        <h4>Personal Funding Potential</h4>
+        <div class="amt" id="personalAmt">$0</div>
+      </div>
+      <div class="fundCell">
+        <h4>Business Funding Potential</h4>
+        <div class="amt" id="businessAmt">$0</div>
+      </div>
+    </div>
+
+    <div id="totalLine">Total Funding Potential After Repair: $0</div>
+  </div>
+
+  <div class="fixBox" id="fixBox">
+    <h3>Quick Fixes You Can Do Right Now</h3>
+    <ul id="tipsList"></ul>
+  </div>
+
+  <div class="footerNote">
+    Your dispute letters & Repair Roadmap have been sent to your inbox.
+  </div>
+
+  <div class="pulse"></div>
+</section>
+<!--END OF CUSTOM BLOCK 1-->
+<!--START OF CUSTOM BLOCK 2-->
+<!-- ————————————————————————————————
+     FULL FIXED JS (BACKEND-CORRECT)
+——————————————————————————————— -->
+<script>
+(function(){
+  const params = new URLSearchParams(window.location.search);
+
+  const getNum = (v)=>{
+    if(v==null) return 0;
+    const n = Number(String(v).replace(/[^\d.-]/g,""));
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const neg   = getNum(params.get("neg"));
+  const late  = getNum(params.get("late"));
+  const score = params.get("score") || "--";
+
+  document.getElementById("collectionsVal").textContent =
+    `${neg} item${neg===1?"":"s"} flagged for removal`;
+
+  document.getElementById("lateVal").textContent =
+    `${late} account${late===1?"":"s"} to correct`;
+
+  document.getElementById("scoreVal").textContent = `Score: ${score}`;
+
+  /* ——— FIXED FUNDING PARAMETER NAMES ——— */
+  const personalFromUrl = getNum(params.get("personalTotal"));   // FIXED
+  const businessFromUrl = getNum(params.get("businessTotal"));   // FIXED
+  const totalFromUrl    = getNum(params.get("totalCombined"));   // FIXED
+
+  const usePlaceholders =
+    (!personalFromUrl && !businessFromUrl && !totalFromUrl);
+
+  const personalTarget = usePlaceholders ? 200000 : personalFromUrl;
+  const businessTarget = usePlaceholders ? 200000 : businessFromUrl;
+  const totalTarget    = usePlaceholders
+      ? 400000
+      : (totalFromUrl || personalTarget + businessTarget);
+
+  const personalAmtEl = document.getElementById("personalAmt");
+  const businessAmtEl = document.getElementById("businessAmt");
+  const totalLineEl   = document.getElementById("totalLine");
+  const fundBox       = document.getElementById("fundBox");
+  const tipsList      = document.getElementById("tipsList");
+  const ctaBtn        = document.getElementById("ctaButton");
+
+  /* ——— ANIMATIONS (UNCHANGED) ——— */
+  function animateMoney(el, end, duration){
+    if(!el) return;
+    duration = duration * 1.2;
+    const start = 0;
+    const startTime = performance.now();
+    function tick(now){
+      const p = Math.min((now - startTime)/duration,1);
+      const eased = 1 - Math.pow(1-p,3);
+      const val = Math.floor(start + (end-start)*eased);
+      el.textContent = "$" + val.toLocaleString();
+      if(p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function animateTotalText(end, duration){
+    const el = totalLineEl;
+    if(!el) return;
+    duration = duration * 1.2;
+    const start = 0;
+    const startTime = performance.now();
+    function tick(now){
+      const p = Math.min((now - startTime)/duration,1);
+      const eased = 1 - Math.pow(1-p,3);
+      const val = Math.floor(start + (end-start)*eased);
+      el.textContent = "Total Funding Potential After Repair: $" + val.toLocaleString();
+      if(p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  const initialShadow = window.getComputedStyle(fundBox).boxShadow;
+
+  function pulseFundBox(){
+    fundBox.style.transition = "box-shadow 340ms ease-out";
+    fundBox.style.boxShadow = "0 0 56px rgba(56,189,248,.45)";
+    setTimeout(()=>{
+      fundBox.style.transition = "box-shadow 420ms ease-out";
+      fundBox.style.boxShadow = initialShadow;
+    },360);
+  }
+
+  function startCtaBreathing(){
+    ctaBtn.classList.add("cta-breathe");
+  }
+
+  /* ——— SUGGESTIONS (UNCHANGED, AND WORKING) ——— */
+  const suggestionsRaw = params.get("suggestions");
+
+  if(suggestionsRaw){
+    try {
+      const clean = decodeURIComponent(suggestionsRaw);
+      const arr = JSON.parse(clean);
+      tipsList.innerHTML = arr.map(t => `<li>${t}</li>`).join("");
+    } catch (e){
+      console.error("Suggestion parse error:", e);
+    }
+  } else {
+    const fallback = [
+      "Keep each credit card under ~10% utilization for the fastest score gains.",
+      "Remove any authorized user cards with high balances — they’re pulling you down.",
+      "Clean old addresses and employers so lenders see one clear, current profile.",
+      "Avoid new inquiries while we repair — fewer fresh pulls = better approvals.",
+      "Pay revolving cards before the statement date, not just the due date.",
+      "Add 1–2 secured cards if your file is thin to build positive history fast."
+    ];
+    tipsList.innerHTML = fallback.map(t => `<li>${t}</li>`).join("");
+  }
+
+  /* ——— RUN ANIMATIONS ——— */
+  function run(){
+    animateMoney(personalAmtEl, personalTarget, 1300);
+    animateMoney(businessAmtEl, businessTarget, 1300);
+    animateTotalText(totalTarget,1500);
+    pulseFundBox();
+    setTimeout(startCtaBreathing,300);
+  }
+
+  run();
+
+})();
+</script>
+<!-- END OF CUSTOM BLOCK 2 -->
