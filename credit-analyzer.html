@@ -575,6 +575,11 @@ document.addEventListener("DOMContentLoaded", () => {
   btn.addEventListener("click", async () => {
     clearError();
 
+    if (typeof window.fhCanAnalyze === "function" && !window.fhCanAnalyze()) {
+      showError("Please complete all required fields before analyzing.");
+      return;
+    }
+
     const name = document.getElementById("fh_name").value.trim();
     const email = document.getElementById("fh_email").value.trim();
     const phone = document.getElementById("fh_phone").value.trim();
@@ -734,6 +739,224 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /* ---------------------------
+        REMOTE FIELD VALIDATION
+  ----------------------------*/
+  const validationState = {
+    emailValid: false,
+    phoneValid: false,
+    businessValid: true
+  };
+
+  const validationTokens = { email: 0, phone: 0, business: 0 };
+
+  function debounce(fn, delay) {
+    let t;
+    return (...args) => {
+      clearTimeout(t);
+      t = setTimeout(() => fn(...args), delay);
+    };
+  }
+
+  function applyValidation(key, inputEl, isValid, message) {
+    validationState[key] = !!isValid;
+    if (isValid) {
+      setError(inputEl);
+    } else if (message !== undefined) {
+      setError(inputEl, message);
+    }
+    updateAnalyzeState();
+  }
+
+  function updateAnalyzeState() {
+    const btn = byId("fh_analyze");
+    const consentInput = byId("fh_consent");
+    const filesInput = byId("fh_file");
+    const bizInput = byId("fh_biz");
+
+    const bizValue = (bizInput && bizInput.value || "").trim();
+    const businessReady = bizValue ? validationState.businessValid : true;
+    const hasFiles = !!(filesInput && filesInput.files && filesInput.files.length);
+    const ready = validationState.emailValid &&
+                  validationState.phoneValid &&
+                  businessReady &&
+                  !!(consentInput && consentInput.checked) &&
+                  hasFiles;
+
+    if (btn) btn.disabled = !ready;
+    return ready;
+  }
+
+  // Expose a read hook for other scripts on the page.
+  window.fhCanAnalyze = updateAnalyzeState;
+
+  function validateEmailBackend() {
+    const input = byId("fh_email");
+    if (!input) return;
+
+    const value = input.value.trim();
+    if (!value) {
+      applyValidation("emailValid", input, false, "");
+      return;
+    }
+
+    if (!isValidEmail(value)) {
+      applyValidation("emailValid", input, false, "Please enter a valid email address.");
+      return;
+    }
+
+    const token = ++validationTokens.email;
+    fetch(API_BASE + "/api/lite/validate/email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: value })
+    })
+      .then(r => r.json().catch(() => ({})))
+      .then(data => {
+        if (token !== validationTokens.email) return;
+        if (data && data.ok) {
+          applyValidation("emailValid", input, true);
+        } else {
+          applyValidation(
+            "emailValid",
+            input,
+            false,
+            data?.msg || data?.error || "Email validation failed."
+          );
+        }
+      })
+      .catch(() => {
+        if (token !== validationTokens.email) return;
+        applyValidation("emailValid", input, false, "Email validation unavailable.");
+      });
+  }
+
+  function validatePhoneBackend() {
+    const input = byId("fh_phone");
+    if (!input) return;
+
+    const value = input.value.trim();
+    const digits = value.replace(/\D/g, "");
+    if (!digits) {
+      applyValidation("phoneValid", input, false, "");
+      return;
+    }
+
+    if (!isValidPhone(value)) {
+      applyValidation("phoneValid", input, false, "Enter a full valid phone number.");
+      return;
+    }
+
+    const token = ++validationTokens.phone;
+    fetch(API_BASE + "/api/lite/validate/phone", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: value })
+    })
+      .then(r => r.json().catch(() => ({})))
+      .then(data => {
+        if (token !== validationTokens.phone) return;
+        if (data && data.ok) {
+          applyValidation("phoneValid", input, true);
+        } else {
+          applyValidation(
+            "phoneValid",
+            input,
+            false,
+            data?.msg || data?.error || "Phone validation failed."
+          );
+        }
+      })
+      .catch(() => {
+        if (token !== validationTokens.phone) return;
+        applyValidation("phoneValid", input, false, "Phone validation unavailable.");
+      });
+  }
+
+  function validateBusinessBackend() {
+    const input = byId("fh_biz");
+    if (!input) return;
+
+    const value = input.value.trim();
+    if (!value) {
+      applyValidation("businessValid", input, true);
+      return;
+    }
+
+    if (value.length < 2) {
+      applyValidation("businessValid", input, false, "Please enter a valid business name.");
+      return;
+    }
+
+    const token = ++validationTokens.business;
+    fetch(API_BASE + "/api/lite/validate/business", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ business: value })
+    })
+      .then(r => r.json().catch(() => ({})))
+      .then(data => {
+        if (token !== validationTokens.business) return;
+        if (data && data.ok !== false) {
+          applyValidation("businessValid", input, true);
+        } else {
+          applyValidation(
+            "businessValid",
+            input,
+            false,
+            data?.msg || data?.error || "Business validation failed."
+          );
+        }
+      })
+      .catch(() => {
+        if (token !== validationTokens.business) return;
+        applyValidation("businessValid", input, false, "Business validation unavailable.");
+      });
+  }
+
+  const emailInput = byId("fh_email");
+  if (emailInput) {
+    const debouncedEmail = debounce(validateEmailBackend, 2500);
+    emailInput.addEventListener("input", () => {
+      validationState.emailValid = false;
+      debouncedEmail();
+      updateAnalyzeState();
+    });
+    emailInput.addEventListener("blur", validateEmailBackend);
+  }
+
+  const phoneInput = byId("fh_phone");
+  if (phoneInput) {
+    const debouncedPhone = debounce(validatePhoneBackend, 2500);
+    phoneInput.addEventListener("input", () => {
+      validationState.phoneValid = false;
+      debouncedPhone();
+      updateAnalyzeState();
+    });
+    phoneInput.addEventListener("blur", validatePhoneBackend);
+  }
+
+  const bizInput = byId("fh_biz");
+  if (bizInput) {
+    const debouncedBiz = debounce(validateBusinessBackend, 2500);
+    bizInput.addEventListener("input", () => {
+      const hasValue = !!bizInput.value.trim();
+      validationState.businessValid = hasValue ? false : true;
+      debouncedBiz();
+      updateAnalyzeState();
+    });
+    bizInput.addEventListener("blur", validateBusinessBackend);
+  }
+
+  const consentInput = byId("fh_consent");
+  if (consentInput) consentInput.addEventListener("change", updateAnalyzeState);
+
+  const filesInput = byId("fh_file");
+  if (filesInput) filesInput.addEventListener("change", updateAnalyzeState);
+
+  // Initialize disabled state on load.
+  updateAnalyzeState();
+
+  /* ---------------------------
         BUTTON PROGRESS UI
   ----------------------------*/
   function setProgress(percent) {
@@ -777,6 +1000,12 @@ document.addEventListener("DOMContentLoaded", function () {
       err.textContent = "";
     }
     if (box) box.textContent = "";
+
+    if (typeof window.fhCanAnalyze === "function" && !window.fhCanAnalyze()) {
+      err.style.display = "block";
+      err.textContent = "Please complete all required fields before analyzing.";
+      return;
+    }
 
     /* ---------------------------
           FORM VALIDATION
