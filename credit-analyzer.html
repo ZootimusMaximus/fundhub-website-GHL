@@ -453,6 +453,91 @@ small.hint{color:rgba(255,255,255,.7);}
   font-size:13px;
 }
 </style>
+
+<script>
+(function initUWIDevice() {
+  const DEVICE_KEY = "uwiq_device_id_v1";
+  const LAST_RESULT_KEY = "uwiq_last_result_v1";
+  const LAST_REF_KEY = "uwiq_last_ref_v1";
+  const LAST_EXP_KEY = "uwiq_last_result_expiry_v1";
+
+  function generateId() {
+    const rand = Math.random().toString(16).slice(2, 10);
+    return `dev-${Date.now()}-${rand}`;
+  }
+
+  function getDeviceId() {
+    try {
+      const existing = localStorage.getItem(DEVICE_KEY);
+      if (existing) return existing;
+      const next = generateId();
+      localStorage.setItem(DEVICE_KEY, next);
+      return next;
+    } catch (_) {
+      return "anonymous-device";
+    }
+  }
+
+  function extractRefFromUrl(url) {
+    if (!url) return null;
+    try {
+      const u = new URL(url, window.location.href);
+      return u.searchParams.get("ref");
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function saveLastResult(url, refId, daysRemaining) {
+    try {
+      if (url) localStorage.setItem(LAST_RESULT_KEY, url);
+      if (refId) localStorage.setItem(LAST_REF_KEY, refId);
+      const ttlDays = Number(daysRemaining);
+      const days = Number.isFinite(ttlDays) && ttlDays > 0 ? ttlDays : 30;
+      const exp = Date.now() + days * 24 * 60 * 60 * 1000;
+      localStorage.setItem(LAST_EXP_KEY, String(exp));
+    } catch (_) {}
+  }
+
+  let forceResubmit = false;
+  let targetRef = null;
+  let lastResult = null;
+  let expiry = null;
+
+  try {
+    const params = new URLSearchParams(window.location.search || "");
+    forceResubmit = params.get("forceResubmit") === "1";
+    targetRef = params.get("ref") || null;
+    lastResult = localStorage.getItem(LAST_RESULT_KEY);
+    const storedRef = localStorage.getItem(LAST_REF_KEY) || extractRefFromUrl(lastResult);
+    if (!targetRef && storedRef) targetRef = storedRef;
+    expiry = Number(localStorage.getItem(LAST_EXP_KEY)) || null;
+  } catch (_) {}
+
+  const deviceId = getDeviceId();
+  window.__uwiq = { deviceId, saveLastResult };
+
+  const now = Date.now();
+  const hasValidTtl = expiry ? expiry > now : true;
+
+  if (!forceResubmit && targetRef && hasValidTtl) {
+    window.__uwiqRedirecting = true;
+    const dashUrl = `/referral-dashboard.html?ref=${encodeURIComponent(targetRef)}`;
+    window.location.replace(dashUrl);
+    return;
+  }
+
+  if (!forceResubmit && !targetRef && lastResult && hasValidTtl) {
+    const refFromUrl = extractRefFromUrl(lastResult);
+    if (refFromUrl) {
+      window.__uwiqRedirecting = true;
+      const dashUrl = `/referral-dashboard.html?ref=${encodeURIComponent(refFromUrl)}`;
+      window.location.replace(dashUrl);
+      return;
+    }
+  }
+})();
+</script>
 </head>
 
 <body>
@@ -542,6 +627,8 @@ small.hint{color:rgba(255,255,255,.7);}
 </section>
 
 <script>
+/* Duplicate submission handler intentionally disabled to prevent double requests. */
+/*
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("fh_form");
   const btn = document.getElementById("fh_analyze");
@@ -672,6 +759,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setButtonLoading(false);
   });
 });
+*/
 </script>
 
 </body>
@@ -681,6 +769,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+  if (window.__uwiqRedirecting) return;
   
   /* ---------------------------
         BOOK CALL BUTTON MIRROR
@@ -1051,6 +1140,9 @@ document.addEventListener("DOMContentLoaded", function () {
     fd.append("phone", phoneInput.value);
     fd.append("businessName", bizInput.value);
     fd.append("businessAgeMonths", ageInput.value);
+    if (window.__uwiq && window.__uwiq.deviceId) {
+      fd.append("deviceId", window.__uwiq.deviceId);
+    }
 
     Array.from(filesInput.files).forEach(f => fd.append("file", f));
 
@@ -1096,12 +1188,25 @@ document.addEventListener("DOMContentLoaded", function () {
           const out = JSON.parse(xhr.responseText || "{}");
           if (!out.ok) throw new Error(out.msg || "Processing failed");
 
-          const redirect = out.redirect;
-          const qs = new URLSearchParams(redirect.query || {}).toString();
-          const url = redirect.url + (qs ? "?" + qs : "");
+          const redirect = out.redirect || {};
+          const refId = redirect.refId || redirect.ref || null;
+          const resultUrl =
+            redirect.resultUrl ||
+            redirect.url ||
+            (redirect.query ? redirect.query.url : null) ||
+            "";
+          const dashboardUrl = refId
+            ? `/referral-dashboard.html?ref=${encodeURIComponent(refId)}`
+            : resultUrl;
+
+          if (window.__uwiq && typeof window.__uwiq.saveLastResult === "function") {
+            window.__uwiq.saveLastResult(dashboardUrl || resultUrl, refId, redirect.daysRemaining);
+          }
+
+          const target = dashboardUrl || resultUrl || "/";
 
           setTimeout(() => {
-            window.location.href = url;
+            window.location.href = target;
           }, 150);
 
         } catch (e) {
