@@ -120,6 +120,13 @@
 
   <script>
     (function initDashboard() {
+      window.__config = window.__config || {};
+      if (typeof window.__config.AFFILIATE_DASHBOARD_ENABLED === "undefined") {
+        window.__config.AFFILIATE_DASHBOARD_ENABLED = "false";
+      }
+      const affiliateOn = window.__config.AFFILIATE_DASHBOARD_ENABLED === "true";
+      if (!affiliateOn) return;
+
       const params = new URLSearchParams(window.location.search || "");
       const ref = params.get("ref");
       const API_BASE = "https://underwrite-iq-lite.vercel.app";

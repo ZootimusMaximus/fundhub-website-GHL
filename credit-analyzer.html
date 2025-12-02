@@ -456,6 +456,15 @@ small.hint{color:rgba(255,255,255,.7);}
 
 <script>
 (function initUWIDevice() {
+  window.__config = window.__config || {};
+  if (typeof window.__config.AFFILIATE_DASHBOARD_ENABLED === "undefined") {
+    window.__config.AFFILIATE_DASHBOARD_ENABLED = "false";
+  }
+  if (typeof window.__config.IDENTITY_VERIFICATION_ENABLED === "undefined") {
+    window.__config.IDENTITY_VERIFICATION_ENABLED = "true";
+  }
+
+  const affiliateOn = window.__config.AFFILIATE_DASHBOARD_ENABLED === "true";
   const DEVICE_KEY = "uwiq_device_id_v1";
   const LAST_RESULT_KEY = "uwiq_last_result_v1";
   const LAST_REF_KEY = "uwiq_last_ref_v1";
@@ -520,20 +529,22 @@ small.hint{color:rgba(255,255,255,.7);}
   const now = Date.now();
   const hasValidTtl = expiry ? expiry > now : true;
 
-  if (!forceResubmit && targetRef && hasValidTtl) {
-    window.__uwiqRedirecting = true;
-    const dashUrl = `/referral-dashboard.html?ref=${encodeURIComponent(targetRef)}`;
-    window.location.replace(dashUrl);
-    return;
-  }
-
-  if (!forceResubmit && !targetRef && lastResult && hasValidTtl) {
-    const refFromUrl = extractRefFromUrl(lastResult);
-    if (refFromUrl) {
+  if (affiliateOn) {
+    if (!forceResubmit && targetRef && hasValidTtl) {
       window.__uwiqRedirecting = true;
-      const dashUrl = `/referral-dashboard.html?ref=${encodeURIComponent(refFromUrl)}`;
+      const dashUrl = `/referral-dashboard.html?ref=${encodeURIComponent(targetRef)}`;
       window.location.replace(dashUrl);
       return;
+    }
+
+    if (!forceResubmit && !targetRef && lastResult && hasValidTtl) {
+      const refFromUrl = extractRefFromUrl(lastResult);
+      if (refFromUrl) {
+        window.__uwiqRedirecting = true;
+        const dashUrl = `/referral-dashboard.html?ref=${encodeURIComponent(refFromUrl)}`;
+        window.location.replace(dashUrl);
+        return;
+      }
     }
   }
 })();
@@ -1189,15 +1200,16 @@ document.addEventListener("DOMContentLoaded", function () {
           if (!out.ok) throw new Error(out.msg || "Processing failed");
 
           const redirect = out.redirect || {};
+          const affiliateOn = window.__config && window.__config.AFFILIATE_DASHBOARD_ENABLED === "true";
           const refId = redirect.refId || redirect.ref || null;
           const resultUrl =
             redirect.resultUrl ||
             redirect.url ||
             (redirect.query ? redirect.query.url : null) ||
             "";
-          const dashboardUrl = refId
+          const dashboardUrl = affiliateOn && refId
             ? `/referral-dashboard.html?ref=${encodeURIComponent(refId)}`
-            : resultUrl;
+            : null;
 
           if (window.__uwiq && typeof window.__uwiq.saveLastResult === "function") {
             window.__uwiq.saveLastResult(dashboardUrl || resultUrl, refId, redirect.daysRemaining);
