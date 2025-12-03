@@ -464,11 +464,7 @@ small.hint{color:rgba(255,255,255,.7);}
     window.__config.IDENTITY_VERIFICATION_ENABLED = "true";
   }
 
-  const affiliateOn = window.__config.AFFILIATE_DASHBOARD_ENABLED === "true";
   const DEVICE_KEY = "uwiq_device_id_v1";
-  const LAST_RESULT_KEY = "uwiq_last_result_v1";
-  const LAST_REF_KEY = "uwiq_last_ref_v1";
-  const LAST_EXP_KEY = "uwiq_last_result_expiry_v1";
 
   function generateId() {
     const rand = Math.random().toString(16).slice(2, 10);
@@ -487,66 +483,8 @@ small.hint{color:rgba(255,255,255,.7);}
     }
   }
 
-  function extractRefFromUrl(url) {
-    if (!url) return null;
-    try {
-      const u = new URL(url, window.location.href);
-      return u.searchParams.get("ref");
-    } catch (_) {
-      return null;
-    }
-  }
-
-  function saveLastResult(url, refId, daysRemaining) {
-    try {
-      if (url) localStorage.setItem(LAST_RESULT_KEY, url);
-      if (refId) localStorage.setItem(LAST_REF_KEY, refId);
-      const ttlDays = Number(daysRemaining);
-      const days = Number.isFinite(ttlDays) && ttlDays > 0 ? ttlDays : 30;
-      const exp = Date.now() + days * 24 * 60 * 60 * 1000;
-      localStorage.setItem(LAST_EXP_KEY, String(exp));
-    } catch (_) {}
-  }
-
-  let forceResubmit = false;
-  let targetRef = null;
-  let lastResult = null;
-  let expiry = null;
-
-  try {
-    const params = new URLSearchParams(window.location.search || "");
-    forceResubmit = params.get("forceResubmit") === "1";
-    targetRef = params.get("ref") || null;
-    lastResult = localStorage.getItem(LAST_RESULT_KEY);
-    const storedRef = localStorage.getItem(LAST_REF_KEY) || extractRefFromUrl(lastResult);
-    if (!targetRef && storedRef) targetRef = storedRef;
-    expiry = Number(localStorage.getItem(LAST_EXP_KEY)) || null;
-  } catch (_) {}
-
   const deviceId = getDeviceId();
-  window.__uwiq = { deviceId, saveLastResult };
-
-  const now = Date.now();
-  const hasValidTtl = expiry ? expiry > now : true;
-
-  if (affiliateOn) {
-    if (!forceResubmit && targetRef && hasValidTtl) {
-      window.__uwiqRedirecting = true;
-      const dashUrl = `/referral-dashboard.html?ref=${encodeURIComponent(targetRef)}`;
-      window.location.replace(dashUrl);
-      return;
-    }
-
-    if (!forceResubmit && !targetRef && lastResult && hasValidTtl) {
-      const refFromUrl = extractRefFromUrl(lastResult);
-      if (refFromUrl) {
-        window.__uwiqRedirecting = true;
-        const dashUrl = `/referral-dashboard.html?ref=${encodeURIComponent(refFromUrl)}`;
-        window.location.replace(dashUrl);
-        return;
-      }
-    }
-  }
+  window.__uwiq = { deviceId };
 })();
 </script>
 </head>
@@ -638,149 +576,7 @@ small.hint{color:rgba(255,255,255,.7);}
 </section>
 
 <script>
-/* Duplicate submission handler intentionally disabled to prevent double requests. */
-/*
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("fh_form");
-  const btn = document.getElementById("fh_analyze");
-  const errorBox = document.getElementById("errorBox");
-
-  // ✅ Use switchboard (correct orchestrator)
-  const ANALYZER_URL = "https://underwrite-iq-lite.vercel.app/api/lite/switchboard";
-
-  function showError(msg) {
-    errorBox.style.display = "block";
-    errorBox.textContent = msg;
-  }
-
-  function clearError() {
-    errorBox.style.display = "none";
-    errorBox.textContent = "";
-  }
-
-  function setButtonLoading(isLoading) {
-    if (isLoading) {
-      btn.classList.add("loading");
-      btn.style.setProperty("--progress", "100%");
-      btn.querySelector("span").textContent = "Analyzing…";
-    } else {
-      btn.classList.remove("loading");
-      btn.style.setProperty("--progress", "0%");
-      btn.querySelector("span").textContent = "Analyze My Report";
-    }
-  }
-
-  btn.addEventListener("click", async () => {
-    clearError();
-
-    if (typeof window.fhCanAnalyze === "function" && !window.fhCanAnalyze()) {
-      showError("Please complete all required fields before analyzing.");
-      return;
-    }
-
-    const name = document.getElementById("fh_name").value.trim();
-    const email = document.getElementById("fh_email").value.trim();
-    const phone = document.getElementById("fh_phone").value.trim();
-    const consent = document.getElementById("fh_consent").checked;
-    const bizName = document.getElementById("fh_biz").value || "";
-    const bizAge = document.getElementById("fh_biz_age").value || "";
-    const filesInput = document.getElementById("fh_file");
-    const files = filesInput.files;
-
-    if (!name || !email || !phone) {
-      showError("Please fill in your name, email, and phone.");
-      return;
-    }
-
-    if (!consent) {
-      showError("You must authorize FundHub.ai to review your report.");
-      return;
-    }
-
-    if (!files || files.length === 0) {
-      showError("Please upload at least one PDF file.");
-      return;
-    }
-
-    // ✅ Validate all uploaded files are PDFs
-    const allPdf = Array.from(files).every(f =>
-      f.type === "application/pdf" || f.name.toLowerCase().endsWith(".pdf")
-    );
-    if (!allPdf) {
-      showError("Only PDF files are allowed.");
-      return;
-    }
-
-    setButtonLoading(true);
-
-    try {
-      const fd = new FormData();
-      fd.append("name", name);
-      fd.append("email", email);
-      fd.append("phone", phone);
-      fd.append("businessName", bizName);
-      fd.append("businessAgeMonths", bizAge);
-
-      // ✅ Send ALL selected PDFs (1–3) to backend
-      Array.from(files).forEach(f => fd.append("file", f));
-
-      const resp = await fetch(ANALYZER_URL, {
-        method: "POST",
-        body: fd
-      });
-
-      let out;
-      try {
-        out = await resp.json();
-      } catch (e) {
-        console.error("Failed to parse JSON:", e);
-        showError("Unexpected response from analyzer. Please try again.");
-        setButtonLoading(false);
-        return;
-      }
-
-      if (!out || out.ok === false) {
-        showError(
-          (out && (out.reason || out.msg))
-            ? (out.reason || out.msg)
-            : "Unable to analyze this file. Please upload a standard credit report PDF."
-        );
-        setButtonLoading(false);
-        return;
-      }
-
-      if (!out.redirect || !out.redirect.url) {
-        showError("Analyzer finished, but no redirect destination was provided.");
-        setButtonLoading(false);
-        return;
-      }
-
-      const qs = new URLSearchParams(out.redirect.query || {}).toString();
-      const finalUrl = out.redirect.url + (qs ? "?" + qs : "");
-
-      window.location.href = finalUrl;
-
-    } catch (err) {
-      console.error("Analyzer error:", err);
-      showError("Something went wrong while analyzing your report. Please try again.");
-      setButtonLoading(false);
-      return;
-    }
-
-    setButtonLoading(false);
-  });
-});
-*/
-</script>
-
-</body>
-</html>
-<!-- END OF CUSTOM BLOCK 1 -->
-<!--START OF CUSTOM BLOCK 2-->
-
-<script>
 document.addEventListener("DOMContentLoaded", function () {
-  if (window.__uwiqRedirecting) return;
   
   /* ---------------------------
         BOOK CALL BUTTON MIRROR
@@ -1077,13 +873,22 @@ document.addEventListener("DOMContentLoaded", function () {
     if (span) span.textContent = "Analyze My Report";
   }
 
+  function startSuspenseProgress() {
+    let pct = 10;
+    setProgress(pct);
+    return setInterval(() => {
+      pct = Math.min(pct + 3, 95);
+      setProgress(pct);
+    }, 180);
+  }
+
   /* ---------------------------
           MAIN BUTTON LOGIC
   ----------------------------*/
   const analyze = byId("fh_analyze");
   if (!analyze) return;
 
-  analyze.addEventListener("click", () => {
+  analyze.addEventListener("click", async () => {
     const nameInput    = byId("fh_name");
     const emailInput   = byId("fh_email");
     const phoneInput   = byId("fh_phone");
@@ -1161,83 +966,46 @@ document.addEventListener("DOMContentLoaded", function () {
       .reduce((s, f) => s + f.size, 0);
 
     /* ---------------------------
-          XHR WITH PROGRESS
+          FETCH + REDIRECT
     ----------------------------*/
-    const xhr = new XMLHttpRequest();
+    const endpoint = API_BASE + "/api/lite/switchboard";
+    let suspenseTimer = null;
 
-    /* FIXED HERE ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ */
-    xhr.open("POST", API_BASE + "/api/lite/switchboard", true);
-    /* FIXED HERE ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ */
+    try {
+      suspenseTimer = startSuspenseProgress();
+      const response = await fetch(endpoint, {
+        method: "POST",
+        body: fd,
+        redirect: "follow"
+      });
 
-    xhr.upload.onprogress = evt => {
-      if (!evt.lengthComputable || !totalSize) return;
-      let pct = (evt.loaded / totalSize) * 80;
-      if (pct > 80) pct = 80;
-      setProgress(pct);
-    };
+      if (suspenseTimer) clearInterval(suspenseTimer);
+      setProgress(100);
 
-    let suspenseStarted = false;
-
-    xhr.onreadystatechange = () => {
-      if ((xhr.readyState === 2 || xhr.readyState === 3) && !suspenseStarted) {
-        suspenseStarted = true;
-        let suspense = 80;
-        const timer = setInterval(() => {
-          suspense += 0.9;
-          if (suspense >= 95 || xhr.readyState === 4) {
-            clearInterval(timer);
-          } else {
-            setProgress(suspense);
-          }
-        }, 100);
+      if (response.redirected && response.url) {
+        window.location.assign(response.url);
+        return;
       }
 
-      if (xhr.readyState === 4) {
-        setProgress(100);
-
-        try {
-          const out = JSON.parse(xhr.responseText || "{}");
-          if (!out.ok) throw new Error(out.msg || "Processing failed");
-
-          const redirect = out.redirect || {};
-          const affiliateOn = window.__config && window.__config.AFFILIATE_DASHBOARD_ENABLED === "true";
-          const refId = redirect.refId || redirect.ref || null;
-          const resultUrl =
-            redirect.resultUrl ||
-            redirect.url ||
-            (redirect.query ? redirect.query.url : null) ||
-            "";
-          const dashboardUrl = affiliateOn && refId
-            ? `/referral-dashboard.html?ref=${encodeURIComponent(refId)}`
-            : null;
-
-          if (window.__uwiq && typeof window.__uwiq.saveLastResult === "function") {
-            window.__uwiq.saveLastResult(dashboardUrl || resultUrl, refId, redirect.daysRemaining);
-          }
-
-          const target = dashboardUrl || resultUrl || "/";
-
-          setTimeout(() => {
-            window.location.href = target;
-          }, 150);
-
-        } catch (e) {
-          err.style.display = "block";
-          err.textContent = "⚠️ " + (e.message || "Unexpected error.");
-          box.textContent = "";
-          resetButton();
-        }
+      let payload = {};
+      try {
+        payload = await response.json();
+      } catch (_) {
+        // ignore json parse errors
       }
-    };
 
-    xhr.onerror = () => {
+      const message =
+        payload?.msg ||
+        payload?.reason ||
+        `Analyzer unavailable (status ${response.status || 0}).`;
+      throw new Error(message);
+    } catch (fetchErr) {
+      if (suspenseTimer) clearInterval(suspenseTimer);
       err.style.display = "block";
-      err.textContent = "⚠️ Network error.";
+      err.textContent = "⚠️ " + (fetchErr?.message || "Network error.");
       resetButton();
-    };
-
-    setProgress(0);
-    xhr.send(fd);
+      return;
+    }
   });
 
 });
