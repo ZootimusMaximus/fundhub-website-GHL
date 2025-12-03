@@ -295,45 +295,51 @@
           content.style.display = "block";
         }
 
-        // ------------------------------------------------------------
-        // STATS — only show placeholders if API is empty or fails
-        // ------------------------------------------------------------
-        function renderStats(stats) {
-          const placeholder = {
-            tier1_earnings: 1240,
-            tier2_earnings: 320,
-            total_earnings: 1560,
-            tier1_referrals_count: 14,
-            tier2_referrals_count: 5
-          };
+       function renderStats(stats) {
+  const placeholder = {
+    tier1_earnings: 1240,
+    tier2_earnings: 320,
+    total_earnings: 1560,
+    tier1_referrals_count: 14,
+    tier2_referrals_count: 5
+  };
 
-          const useStats = (stats && Object.keys(stats).length > 0)
-            ? stats
-            : placeholder;
+  // Detect if API returned REAL numbers or EMPTY numbers
+  const apiLooksEmpty =
+    !stats ||
+    (
+      stats.tier1_earnings === 0 &&
+      stats.tier2_earnings === 0 &&
+      stats.total_earnings === 0 &&
+      stats.tier1_referrals_count === 0 &&
+      stats.tier2_referrals_count === 0
+    );
 
-          if (!stats || Object.keys(stats).length === 0) {
-            warningEl.style.display = "block";
-            warningEl.textContent =
-              "Showing simulated sample data — live referral stats will appear once your system is connected.";
-          }
+  const useStats = apiLooksEmpty ? placeholder : stats;
 
-          setText("tier1Earnings", `$${useStats.tier1_earnings.toLocaleString()}`);
-          setText("tier2Earnings", `$${useStats.tier2_earnings.toLocaleString()}`);
-          setText("totalEarnings", `$${useStats.total_earnings.toLocaleString()}`);
-          setText("tier1Count", useStats.tier1_referrals_count);
-          setText("tier2Count", useStats.tier2_referrals_count);
+  if (apiLooksEmpty) {
+    warningEl.style.display = "block";
+    warningEl.textContent =
+      "Showing sample data — live referral stats will appear once the system is connected.";
+  }
 
-          const setWidth = (id, val) => {
-            const el = document.getElementById(id);
-            if (el) el.style.width = `${pct(val)}%`;
-          };
+  setText("tier1Earnings", `$${useStats.tier1_earnings.toLocaleString()}`);
+  setText("tier2Earnings", `$${useStats.tier2_earnings.toLocaleString()}`);
+  setText("totalEarnings", `$${useStats.total_earnings.toLocaleString()}`);
+  setText("tier1Count", useStats.tier1_referrals_count);
+  setText("tier2Count", useStats.tier2_referrals_count);
 
-          setWidth("tier1Progress", useStats.tier1_earnings);
-          setWidth("tier2Progress", useStats.tier2_earnings);
-          setWidth("totalProgress", useStats.total_earnings);
-          setWidth("tier1CountBar", useStats.tier1_referrals_count);
-          setWidth("tier2CountBar", useStats.tier2_referrals_count);
-        }
+  const setWidth = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.style.width = `${pct(val)}%`;
+  };
+
+  setWidth("tier1Progress", useStats.tier1_earnings);
+  setWidth("tier2Progress", useStats.tier2_earnings);
+  setWidth("totalProgress", useStats.total_earnings);
+  setWidth("tier1CountBar", useStats.tier1_referrals_count);
+  setWidth("tier2CountBar", useStats.tier2_referrals_count);
+}
 
         // ------------------------------------------------------------
         // SHARE BUTTON
