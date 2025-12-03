@@ -110,41 +110,39 @@
 
       <div id="warning" class="warning" style="display:none;"></div>
     </div>
-
-    <div id="emptyState" class="card" style="display:none;">
-      <h3>Waiting for your analyzer result</h3>
-      <p class="muted">We couldn't find an active session. Upload your report again to generate a referral dashboard.</p>
-      <a class="link" href="/credit-analyzer.html">Back to Analyzer</a>
-    </div>
   </div>
 
   <script>
     (function initDashboard() {
+      // ------------------------------------------------------------------
+      // CONFIG
+      // ------------------------------------------------------------------
       window.__config = window.__config || {};
+
+      // Default ON so it actually runs in your static site
       if (typeof window.__config.AFFILIATE_DASHBOARD_ENABLED === "undefined") {
-        window.__config.AFFILIATE_DASHBOARD_ENABLED = "false";
+        window.__config.AFFILIATE_DASHBOARD_ENABLED = "true";
       }
+
       const affiliateOn = window.__config.AFFILIATE_DASHBOARD_ENABLED === "true";
       if (!affiliateOn) return;
 
       const params = new URLSearchParams(window.location.search || "");
-      const ref = params.get("ref");
+      // If no ?ref, fall back to demo so UI still renders
+      const ref = params.get("ref") || "demo123";
+
       const API_BASE = "https://underwrite-iq-lite.vercel.app";
 
-      const content = document.getElementById("content");
-      const emptyState = document.getElementById("emptyState");
-      const warningEl = document.getElementById("warning");
+      const content      = document.getElementById("content");
+      const warningEl    = document.getElementById("warning");
       const resultTypeEl = document.getElementById("resultType");
 
-      if (!ref) {
-        emptyState.style.display = "block";
-        resultTypeEl.textContent = "No ref id";
-        return;
-      }
-
+      // ------------------------------------------------------------------
+      // HELPERS
+      // ------------------------------------------------------------------
       function setText(id, value) {
         const el = document.getElementById(id);
-        if (el) el.textContent = value || "—";
+        if (el) el.textContent = value ?? "—";
       }
 
       function pct(num) {
@@ -155,28 +153,43 @@
 
       async function fetchJson(url) {
         try {
-          const resp = await fetch(url);
+          const resp = await fetch(url, { method: "GET" });
+          if (!resp.ok) return null;
           return await resp.json().catch(() => ({}));
-        } catch (_) {
+        } catch {
           return null;
         }
       }
 
-      // ✅ PATCH #1 — PLACEHOLDER REDIRECT
+      // ------------------------------------------------------------------
+      // REDIRECT DATA  (with placeholder fallback)
+      // ------------------------------------------------------------------
       async function loadRedirect() {
-        const data = await fetchJson(`${API_BASE}/api/lite/referral-lookup?ref=${encodeURIComponent(ref)}`);
+        const url = `${API_BASE}/api/lite/referral-lookup?ref=${encodeURIComponent(ref)}`;
+        const data = await fetchJson(url);
 
         if (!data || !data.ok || !data.redirect) {
+          // Placeholder redirect object
           return {
             resultType: "funding",
-            daysRemaining: 5,
+            daysRemaining: 7,
             lastUpload: null,
             suggestions: [
-              { title: "Placeholder Step 1", description: "Example suggestion." },
-              { title: "Placeholder Step 2", description: "Improve utilization or remove inquiries." }
+              {
+                title: "Share your analyzer",
+                description: "Post your link on Instagram, TikTok, and in your group chats."
+              },
+              {
+                title: "Warm up referrals",
+                description: "Tell people they can see exactly how much they can get funded."
+              },
+              {
+                title: "Re-upload every 30 days",
+                description: "Keep reports fresh so your approvals stay strong."
+              }
             ],
-            affiliateLink: "/credit-analyzer.html?ref=demo123",
-            refId: "demo123"
+            affiliateLink: `/credit-analyzer.html?ref=${encodeURIComponent(ref)}`,
+            refId: ref
           };
         }
 
@@ -185,78 +198,114 @@
 
       function renderRedirect(redirect) {
         const type = redirect.resultType === "funding" ? "Funding" : "Repair";
-        resultTypeEl.textContent = type;
-        resultTypeEl.style.background = redirect.resultType === "funding"
-          ? "rgba(94,234,212,0.15)"
-          : "rgba(248,113,113,0.15)";
-        resultTypeEl.style.color = redirect.resultType === "funding" ? "#5eead4" : "#fca5a5";
+
+        // Badge text (show DEMO when ref is our fake id)
+        resultTypeEl.textContent = ref === "demo123" ? `${type} • Demo` : type;
+        resultTypeEl.style.background =
+          redirect.resultType === "funding"
+            ? "rgba(94,234,212,0.15)"
+            : "rgba(248,113,113,0.15)";
+        resultTypeEl.style.color =
+          redirect.resultType === "funding" ? "#5eead4" : "#fca5a5";
 
         const days = Number(redirect.daysRemaining ?? 0);
         setText("nextUpload", days > 0 ? `${days} days` : "Now");
-        setText("lastUpload", redirect.lastUpload ? new Date(redirect.lastUpload).toLocaleDateString() : "—");
 
-        const summary = redirect.resultType === "funding"
-          ? "You are fundable. Review your steps and share your link below."
-          : "We have a repair path for you. Review the action items and share your link.";
+        const last = redirect.lastUpload
+          ? new Date(redirect.lastUpload).toLocaleDateString()
+          : "—";
+        setText("lastUpload", last);
+
+        const summary =
+          redirect.resultType === "funding"
+            ? "You are fundable. Review your steps and share your link below."
+            : "We have a repair path for you. Review the action items and share your link.";
         setText("summaryText", summary);
 
         const list = document.getElementById("suggestions");
         list.innerHTML = "";
-        (redirect.suggestions || []).forEach(item => {
+        (redirect.suggestions || []).forEach((item) => {
           const li = document.createElement("li");
-          li.innerHTML = `<strong>${item.title || "Action"}:</strong> ${item.description || ""}`;
+          const title = item.title || "Action";
+          const desc  = item.description || "";
+          li.innerHTML = `<strong>${title}:</strong> ${desc}`;
           list.appendChild(li);
         });
 
-        const link = redirect.affiliateLink || `/credit-analyzer.html?ref=${redirect.refId}`;
+        const link =
+          redirect.affiliateLink ||
+          (redirect.refId
+            ? `/credit-analyzer.html?ref=${encodeURIComponent(redirect.refId)}`
+            : `/credit-analyzer.html`);
+
         setText("affiliateLinkLabel", link);
-        document.getElementById("shareBtn").dataset.link = link;
+        const shareBtn = document.getElementById("shareBtn");
+        if (shareBtn) shareBtn.dataset.link = link;
 
         content.style.display = "block";
       }
 
-      // ✅ PATCH #2 — PLACEHOLDER STATS
+      // ------------------------------------------------------------------
+      // STATS  (with placeholder fallback)
+      // ------------------------------------------------------------------
       function renderStats(stats, warning) {
         const safe = {
-          tier1_earnings: stats?.tier1_earnings ?? 0,
-          tier2_earnings: stats?.tier2_earnings ?? 0,
-          total_earnings: stats?.total_earnings ?? 0,
+          tier1_earnings:        stats?.tier1_earnings        ?? 0,
+          tier2_earnings:        stats?.tier2_earnings        ?? 0,
+          total_earnings:        stats?.total_earnings        ?? 0,
           tier1_referrals_count: stats?.tier1_referrals_count ?? 0,
           tier2_referrals_count: stats?.tier2_referrals_count ?? 0
         };
 
         if (warning) {
           warningEl.style.display = "block";
-          warningEl.textContent = warning;
+          warningEl.textContent  = warning;
+        } else if (!stats || Object.keys(stats).length === 0) {
+          warningEl.style.display = "block";
+          warningEl.textContent  = "Sample stats shown — live earnings will appear once referrals start coming in.";
         }
 
         setText("tier1Earnings", `$${safe.tier1_earnings.toLocaleString()}`);
         setText("tier2Earnings", `$${safe.tier2_earnings.toLocaleString()}`);
         setText("totalEarnings", `$${safe.total_earnings.toLocaleString()}`);
-        setText("tier1Count", safe.tier1_referrals_count);
-        setText("tier2Count", safe.tier2_referrals_count);
+        setText("tier1Count", safe.tier1_referrals_count.toString());
+        setText("tier2Count", safe.tier2_referrals_count.toString());
 
         const setWidth = (id, val) => {
           const el = document.getElementById(id);
+          if (!el) return;
           el.style.width = `${pct(val)}%`;
         };
 
-        setWidth("tier1Progress", safe.tier1_earnings);
-        setWidth("tier2Progress", safe.tier2_earnings);
-        setWidth("totalProgress", safe.total_earnings);
-        setWidth("tier1CountBar", safe.tier1_referrals_count);
-        setWidth("tier2CountBar", safe.tier2_referrals_count);
+        setWidth("tier1Progress",      safe.tier1_earnings);
+        setWidth("tier2Progress",      safe.tier2_earnings);
+        setWidth("totalProgress",      safe.total_earnings);
+        setWidth("tier1CountBar",      safe.tier1_referrals_count);
+        setWidth("tier2CountBar",      safe.tier2_referrals_count);
       }
 
-      function bindShare(link) {
-        const btn = document.getElementById("shareBtn");
+      // ------------------------------------------------------------------
+      // SHARE BUTTON
+      // ------------------------------------------------------------------
+      function bindShare(defaultLink) {
+        const btn    = document.getElementById("shareBtn");
         const status = document.getElementById("shareStatus");
+        if (!btn || !status) return;
 
         btn.onclick = async () => {
-          const finalLink = btn.dataset.link || link;
+          const finalLink = btn.dataset.link || defaultLink || `/credit-analyzer.html`;
+
+          if (!finalLink) {
+            status.textContent = "No link available.";
+            return;
+          }
+
           try {
             if (navigator.share) {
-              await navigator.share({ title: "FundHub Referral", url: finalLink });
+              await navigator.share({
+                title: "FundHub Referral",
+                url: finalLink
+              });
               status.textContent = "Shared!";
             } else if (navigator.clipboard?.writeText) {
               await navigator.clipboard.writeText(finalLink);
@@ -265,21 +314,44 @@
               status.textContent = finalLink;
             }
           } catch {
-            status.textContent = "Unable to share.";
+            status.textContent = "Unable to share right now.";
           }
         };
       }
 
+      // ------------------------------------------------------------------
+      // MAIN
+      // ------------------------------------------------------------------
       (async function run() {
         const redirect = await loadRedirect();
-        if (!redirect) return;
+        if (!redirect) {
+          // If even placeholder fails (basically never), still show something
+          renderRedirect({
+            resultType: "funding",
+            daysRemaining: 0,
+            lastUpload: null,
+            suggestions: [],
+            affiliateLink: `/credit-analyzer.html?ref=${encodeURIComponent(ref)}`,
+            refId: ref
+          });
+        } else {
+          renderRedirect(redirect);
+        }
 
-        renderRedirect(redirect);
-        bindShare(redirect.affiliateLink);
+        bindShare(
+          (redirect && redirect.affiliateLink) ||
+          `/credit-analyzer.html?ref=${encodeURIComponent(ref)}`
+        );
 
-        const statsResp = await fetchJson(`${API_BASE}/api/lite/affiliate-stats?ref=${encodeURIComponent(ref)}`);
+        const statsResp = await fetchJson(
+          `${API_BASE}/api/lite/affiliate-stats?ref=${encodeURIComponent(ref)}`
+        );
 
-        renderStats(statsResp?.stats ?? {}, statsResp?.warning ?? null);
+        if (statsResp && statsResp.stats) {
+          renderStats(statsResp.stats, statsResp.warning || null);
+        } else {
+          renderStats({}, null);
+        }
       })();
     })();
   </script>
