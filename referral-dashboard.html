@@ -199,7 +199,7 @@
           list.appendChild(li);
         });
 
-        const link = redirect.affiliateLink || (redirect.refId ? `https://fundhub.ai/credit-analyzer.html?ref=${encodeURIComponent(redirect.refId)}` : "");
+        const link = redirect.affiliateLink || (redirect.refId ? `/credit-analyzer.html?ref=${encodeURIComponent(redirect.refId)}` : "");
         setText("affiliateLinkLabel", link);
         document.getElementById("shareBtn").dataset.link = link;
         content.style.display = "block";
