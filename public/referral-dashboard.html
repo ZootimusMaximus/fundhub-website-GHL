@@ -13,392 +13,775 @@
   <style>
     body {
       font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
-      background: #0f172a;
+      background:
+        radial-gradient(1200px 600px at 10% 10%, rgba(24,164,255,.18), transparent 60%),
+        radial-gradient(1000px 600px at 80% 20%, rgba(34,211,163,.12), transparent 60%),
+        linear-gradient(180deg,#020617 0%, #020617 40%, #020617 100%);
       color: #f8fafc;
       margin: 0;
     }
+
     .wrap {
-      max-width: 1100px;
+      max-width: 1120px;
       margin: 0 auto;
       padding: 28px 16px 64px;
     }
-    .card {
-      background: #0b1220;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 16px;
+
+    .top-card {
+      background: rgba(15,23,42,.96);
+      border: 1px solid rgba(148,163,184,.28);
+      border-radius: 18px;
       padding: 18px 20px;
-      margin-bottom: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+      margin-bottom: 18px;
+      box-shadow: 0 18px 40px rgba(15,23,42,.9);
     }
-    h1, h2, h3 { margin: 0 0 8px; }
-    .muted { color: #cbd5e1; font-size: 14px; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 12px;
+
+    h1, h2, h3 {
+      margin: 0 0 8px;
     }
-    .stat {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
-      padding: 12px;
+
+    .muted {
+      color: #cbd5e1;
+      font-size: 14px;
     }
-    .value { font-size: 28px; font-weight: 800; }
-    .label { color: #94a3b8; font-size: 13px; }
-    .progress {
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 999px;
-      height: 10px;
-      overflow: hidden;
-      margin-top: 8px;
-    }
-    .progress span {
-      display: block;
-      height: 100%;
-      background: linear-gradient(90deg, #38bdf8, #5b7cfa);
-    }
-    .suggestions li { margin-bottom: 8px; line-height: 1.4; }
+
     .badge {
-      display: inline-block;
-      padding: 4px 10px;
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
       border-radius: 999px;
-      background: rgba(56, 189, 248, 0.15);
+      background: rgba(56,189,248,0.18);
       color: #7dd3fc;
       font-weight: 700;
       font-size: 12px;
+      white-space: nowrap;
     }
-    button.share {
-      background: linear-gradient(90deg, #38bdf8, #5b7cfa);
-      color: #0b1220;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 16px;
+
+    .section-card {
+      background: rgba(15,23,42,.96);
+      border-radius: 18px;
+      border: 1px solid rgba(148,163,184,.24);
+      padding: 18px 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 18px 36px rgba(15,23,42,.8);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-size: 16px;
       font-weight: 700;
+    }
+
+    .section-sub {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
+      gap: 16px;
+    }
+
+    .stat {
+      background: rgba(15,23,42,0.96);
+      border-radius: 14px;
+      border: 1px solid rgba(148,163,184,0.32);
+      padding: 14px 16px;
+      box-shadow: 0 14px 32px rgba(15,23,42,0.9);
+    }
+
+    .value {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .label {
+      color: #94a3b8;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .progress {
+      background: rgba(15,23,42,0.9);
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg,#38bdf8,#5b7cfa);
+      width: 0%;
+      transition: width 0.7s ease-out;
+    }
+
+    .pill-total {
+      display: inline-block;
+      background: linear-gradient(90deg,#38bdf8,#5b7cfa);
+      padding: 14px 26px;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 800;
+      color: #0b1120;
+      box-shadow: 0 18px 40px rgba(56,189,248,.5);
+      margin-bottom: 18px;
+    }
+
+    .pill-total span {
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .funding-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .fund-card {
+      flex: 1 1 220px;
+      background: rgba(15,23,42,.96);
+      border-radius: 16px;
+      border: 1px solid rgba(148,163,184,.32);
+      padding: 14px 18px;
+      box-shadow: 0 14px 32px rgba(15,23,42,.85);
+    }
+
+    .fund-card h4 {
+      margin: 0 0 4px;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    .fund-card .fund-amt {
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .metrics-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .metric-card {
+      flex: 1 1 150px;
+      background: rgba(15,23,42,.96);
+      border-radius: 14px;
+      border: 1px solid rgba(148,163,184,.3);
+      padding: 10px 12px;
+    }
+
+    .metric-label {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 2px;
+    }
+
+    .metric-value {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .suggestions {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 13px;
+      color: #e2e8f0;
+    }
+
+    .suggestions li {
+      margin-bottom: 6px;
+    }
+
+    .warning {
+      color: #fbbf24;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+
+    .share-btn {
+      background: linear-gradient(90deg,#38bdf8,#5b7cfa);
+      color: #0b1120;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 16px;
+      font-weight: 800;
+      font-size: 14px;
       cursor: pointer;
       width: 100%;
+      box-shadow: 0 14px 30px rgba(56,189,248,.4);
+      transition: transform .12s ease-out, box-shadow .12s ease-out;
     }
-    .warning { color: #fbbf24; font-size: 14px; margin-top: 10px; }
-    a.link { color: #38bdf8; }
+
+    .share-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 40px rgba(56,189,248,.5);
+    }
+
+    .share-status {
+      margin-top: 6px;
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+
+    /* Repair-style bits inside dark theme */
+    .repair-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .repair-card {
+      flex: 1 1 180px;
+      background: rgba(15,23,42,.96);
+      border-radius: 14px;
+      border: 1px solid rgba(248,113,113,.3);
+      padding: 12px 14px;
+    }
+
+    .repair-label {
+      font-size: 13px;
+      color: #fecaca;
+      margin-bottom: 4px;
+    }
+
+    .repair-value {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .repair-fund-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    .repair-fund-cell {
+      flex: 1 1 220px;
+      background: rgba(15,23,42,.96);
+      border-radius: 16px;
+      border: 1px solid rgba(148,163,184,.32);
+      padding: 14px 16px;
+    }
+
+    .repair-fund-cell h4 {
+      margin: 0 0 6px;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    .repair-fund-amt {
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .repair-total-line {
+      margin-top: 6px;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .repair-tips {
+      margin: 6px 0 0;
+      padding-left: 18px;
+      font-size: 13px;
+      color: #e2e8f0;
+    }
+
+    @media (max-width: 720px) {
+      .top-card {
+        padding: 16px 14px;
+      }
+      .section-card {
+        padding: 16px 14px;
+      }
+      .pill-total {
+        width: 100%;
+        text-align: center;
+      }
+    }
   </style>
 </head>
-
 <body>
   <div class="wrap">
-    <div class="card">
+    <!-- Top header -->
+    <div class="top-card">
       <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
         <div>
           <h1>Referral Dashboard</h1>
-          <p class="muted">Track your analyzer status, referral earnings, and share your link.</p>
+          <p class="muted">Review your analyzer results and track your referral earnings.</p>
         </div>
         <div id="resultType" class="badge">Loading…</div>
       </div>
     </div>
 
-    <div id="content" style="display:none;">
-      <div class="card">
-        <h3>Analyzer Summary</h3>
-        <p class="muted" id="summaryText">Loading latest upload…</p>
-
-        <div class="grid">
-          <div class="stat">
-            <div class="value" id="nextUpload">—</div>
-            <div class="label">Next upload window</div>
-          </div>
-
-          <div class="stat">
-            <div class="value" id="lastUpload">—</div>
-            <div class="label">Last upload</div>
-          </div>
-
-          <div class="stat">
-            <div class="value" id="affiliateLinkLabel">—</div>
-            <div class="label">Referral link</div>
+    <!-- Analyzer Summary -->
+    <div class="section-card" id="analyzerSection">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Analyzer Summary</div>
+          <div class="section-sub" id="summarySubtitle">
+            Your original analyzer results are saved here. These only change when you upload a new report.
           </div>
         </div>
       </div>
 
-      <div class="card">
-        <h3>Action Plan</h3>
-        <ul id="suggestions" class="suggestions"></ul>
+      <!-- Funding View -->
+      <div id="fundingSummary" style="display:none;">
+        <div class="pill-total" id="totalFundingPill">
+          Total Funding Approved: <span>$0</span>
+        </div>
+
+        <div class="funding-grid">
+          <div class="fund-card">
+            <h4>Personal Funding Approved</h4>
+            <div class="fund-amt" id="personalFundingVal">$0</div>
+          </div>
+          <div class="fund-card">
+            <h4>Business Funding Approved</h4>
+            <div class="fund-amt" id="businessFundingVal">$0</div>
+          </div>
+        </div>
+
+        <div class="metrics-row">
+          <div class="metric-card">
+            <div class="metric-label">Score</div>
+            <div class="metric-value" id="scoreCardVal">--</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Utilization</div>
+            <div class="metric-value" id="utilCardVal">--%</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Inquiries</div>
+            <div class="metric-value" id="inqCardVal">EX 0 • TU 0 • EQ 0</div>
+          </div>
+        </div>
+
+        <ul class="suggestions" id="fundingSuggestions"></ul>
       </div>
 
-      <div class="card">
-        <h3>Earnings</h3>
-        <div class="grid">
-          <div class="stat">
-            <div class="value" id="tier1Earnings">$0</div>
-            <div class="label">Tier 1 Earnings</div>
-            <div class="progress"><span id="tier1Progress" style="width:0%"></span></div>
+      <!-- Repair View -->
+      <div id="repairSummary" style="display:none;">
+        <div class="repair-grid">
+          <div class="repair-card">
+            <div class="repair-label">Negative Items</div>
+            <div class="repair-value" id="negativesVal">0 items flagged</div>
           </div>
+          <div class="repair-card">
+            <div class="repair-label">Late Payments</div>
+            <div class="repair-value" id="latePaymentsVal">0 accounts</div>
+          </div>
+          <div class="repair-card">
+            <div class="repair-label">Score Potential</div>
+            <div class="repair-value" id="scoreRepairVal">Score: --</div>
+          </div>
+        </div>
 
-          <div class="stat">
-            <div class="value" id="tier2Earnings">$0</div>
-            <div class="label">Tier 2 Earnings</div>
-            <div class="progress"><span id="tier2Progress" style="width:0%"></span></div>
+        <div class="repair-fund-grid">
+          <div class="repair-fund-cell">
+            <h4>Personal Funding Potential</h4>
+            <div class="repair-fund-amt" id="repairPersonalAmt">$0</div>
           </div>
+          <div class="repair-fund-cell">
+            <h4>Business Funding Potential</h4>
+            <div class="repair-fund-amt" id="repairBusinessAmt">$0</div>
+          </div>
+        </div>
 
-          <div class="stat">
-            <div class="value" id="totalEarnings">$0</div>
-            <div class="label">Total Earnings</div>
-            <div class="progress"><span id="totalProgress" style="width:0%"></span></div>
-          </div>
+        <div class="repair-total-line" id="repairTotalLine">
+          Total Funding Potential After Repair: $0
+        </div>
+
+        <ul class="repair-tips" id="repairTipsList"></ul>
+      </div>
+    </div>
+
+    <!-- Earnings -->
+    <div class="section-card">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Earnings</div>
+          <div class="section-sub">Live referral stats. These increase as your referrals complete analyzers.</div>
         </div>
       </div>
 
-      <div class="card">
-        <h3>Referrals</h3>
-        <div class="grid">
-          <div class="stat">
-            <div class="value" id="tier1Count">0</div>
-            <div class="label">Tier 1 Referrals</div>
-            <div class="progress"><span id="tier1CountBar" style="width:0%"></span></div>
-          </div>
+      <div class="grid">
+        <div class="stat">
+          <div class="value" id="tier1Earnings">$0</div>
+          <div class="label">Tier 1 Earnings</div>
+          <div class="progress"><span id="tier1Progress"></span></div>
+        </div>
+        <div class="stat">
+          <div class="value" id="tier2Earnings">$0</div>
+          <div class="label">Tier 2 Earnings</div>
+          <div class="progress"><span id="tier2Progress"></span></div>
+        </div>
+        <div class="stat">
+          <div class="value" id="totalEarnings">$0</div>
+          <div class="label">Total Earnings</div>
+          <div class="progress"><span id="totalProgress"></span></div>
+        </div>
+      </div>
+    </div>
 
-          <div class="stat">
-            <div class="value" id="tier2Count">0</div>
-            <div class="label">Tier 2 Referrals</div>
-            <div class="progress"><span id="tier2CountBar" style="width:0%"></span></div>
-          </div>
+    <!-- Referrals -->
+    <div class="section-card">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Referrals</div>
+          <div class="section-sub">Track how many referrals you’ve brought in.</div>
         </div>
       </div>
 
-      <div class="card">
-        <h3>Share</h3>
-        <p class="muted">Share your referral link and earn on successful analyzer submissions.</p>
-        <button class="share" id="shareBtn">Share Referral Link</button>
-        <div id="shareStatus" class="muted" style="margin-top:8px;"></div>
+      <div class="grid">
+        <div class="stat">
+          <div class="value" id="tier1Count">0</div>
+          <div class="label">Tier 1 Referrals</div>
+          <div class="progress"><span id="tier1CountBar"></span></div>
+        </div>
+        <div class="stat">
+          <div class="value" id="tier2Count">0</div>
+          <div class="label">Tier 2 Referrals</div>
+          <div class="progress"><span id="tier2CountBar"></span></div>
+        </div>
       </div>
-
       <div id="warning" class="warning" style="display:none;"></div>
     </div>
-    <script>
-      (function initDashboard() {
-        // ------------------------------------------------------------
-        // CONFIG
-        // ------------------------------------------------------------
-        window.__config = window.__config || {};
 
-        // Default ON so dashboard always loads
-        if (typeof window.__config.AFFILIATE_DASHBOARD_ENABLED === "undefined") {
-          window.__config.AFFILIATE_DASHBOARD_ENABLED = "true";
+    <!-- Share -->
+    <div class="section-card">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Share</div>
+          <div class="section-sub">
+            Share your referral link and earn on successful analyzer submissions.
+          </div>
+        </div>
+      </div>
+
+      <button class="share-btn" id="shareBtn">Share Referral Link</button>
+      <div id="shareStatus" class="share-status"></div>
+    </div>
+  </div>
+
+  <script>
+    (function initDashboard() {
+      // CONFIG ----------------------------------------------------------------
+      window.__config = window.__config || {};
+      if (typeof window.__config.AFFILIATE_DASHBOARD_ENABLED === "undefined") {
+        window.__config.AFFILIATE_DASHBOARD_ENABLED = "true";
+      }
+      const affiliateOn = window.__config.AFFILIATE_DASHBOARD_ENABLED === "true";
+      if (!affiliateOn) return;
+
+      const params = new URLSearchParams(window.location.search || "");
+      const ref = params.get("ref") || "demo123";
+      const API_BASE = "https://underwrite-iq-lite.vercel.app";
+
+      const resultTypeEl      = document.getElementById("resultType");
+      const fundingSummaryEl  = document.getElementById("fundingSummary");
+      const repairSummaryEl   = document.getElementById("repairSummary");
+      const summarySubtitleEl = document.getElementById("summarySubtitle");
+      const warningEl         = document.getElementById("warning");
+
+      // HELPERS ---------------------------------------------------------------
+      function num(v, fallback = 0) {
+        if (v === null || v === undefined) return fallback;
+        const n = Number(String(v).replace(/[^\d.-]/g, ""));
+        return Number.isFinite(n) ? n : fallback;
+      }
+
+      function setText(id, value) {
+        const el = typeof id === "string" ? document.getElementById(id) : id;
+        if (el) el.textContent = value;
+      }
+
+      function pctForBar(raw) {
+        const n = num(raw, 0);
+        if (n <= 0) return 0;
+        const capped = Math.min(n, 10);
+        return Math.round((capped / 10) * 100);
+      }
+
+      async function fetchJson(url) {
+        try {
+          const resp = await fetch(url, { method: "GET" });
+          if (!resp.ok) return null;
+          return await resp.json().catch(() => ({}));
+        } catch {
+          return null;
         }
+      }
 
-        const affiliateOn = window.__config.AFFILIATE_DASHBOARD_ENABLED === "true";
-        if (!affiliateOn) return;
+      // ANIMATION HELPERS ----------------------------------------------------
+      function animateMoney(el, end, labelPrefix, duration) {
+        if (!el) return;
+        const start = 0;
+        const startTime = performance.now();
+        duration = duration || 1200;
 
-        const params = new URLSearchParams(window.location.search || "");
-        const ref = params.get("ref") || "demo123";
-
-        const API_BASE = "https://underwrite-iq-lite.vercel.app";
-
-        const content      = document.getElementById("content");
-        const warningEl    = document.getElementById("warning");
-        const resultTypeEl = document.getElementById("resultType");
-
-        // ------------------------------------------------------------
-        // HELPERS
-        // ------------------------------------------------------------
-        function setText(id, value) {
-          const el = document.getElementById(id);
-          if (el) el.textContent = value ?? "—";
+        function tick(now) {
+          const p = Math.min((now - startTime) / duration, 1);
+          const eased = 1 - Math.pow(1 - p, 3);
+          const val = Math.floor(start + (end - start) * eased);
+          const text = "$" + val.toLocaleString();
+          el.textContent = labelPrefix ? labelPrefix.replace("%VAL%", text) : text;
+          if (p < 1) requestAnimationFrame(tick);
         }
+        requestAnimationFrame(tick);
+      }
 
-        function pct(num) {
-          if (!num || num <= 0) return 0;
-          const capped = Math.min(Number(num) || 0, 10);
-          return Math.max(0, Math.min(100, Math.round((capped / 10) * 100)));
-        }
+      function animateBar(el, targetPct) {
+        if (!el) return;
+        el.style.width = targetPct + "%";
+      }
 
-        async function fetchJson(url) {
-          try {
-            const resp = await fetch(url, { method: "GET" });
-            if (!resp.ok) return null;
-            return await resp.json().catch(() => ({}));
-          } catch {
-            return null;
-          }
-        }
+      // REDIRECT DATA (with placeholder on API fail) -------------------------
+      async function loadRedirect() {
+        const url = API_BASE + "/api/lite/referral-lookup?ref=" + encodeURIComponent(ref);
+        const data = await fetchJson(url);
 
-        // ------------------------------------------------------------
-        // LOAD REDIRECT — use API if available, else fallback placeholder
-        // ------------------------------------------------------------
-        async function loadRedirect() {
-          const url = `${API_BASE}/api/lite/referral-lookup?ref=${encodeURIComponent(ref)}`;
-          const data = await fetchJson(url);
-
-          if (!data || !data.ok || !data.redirect) {
-            return {
-              resultType: "funding",
-              daysRemaining: 7,
-              lastUpload: null,
-              suggestions: [
-                { title: "Share your analyzer", description: "Promote your link on social apps." },
-                { title: "Messenger outreach", description: "Send your link to 5–10 warm leads daily." },
-                { title: "Re-upload monthly", description: "Fresh data keeps approval odds higher." }
-              ],
-              affiliateLink: `/credit-analyzer.html?ref=${encodeURIComponent(ref)}`,
-              refId: ref
-            };
-          }
-
-          return data.redirect;
-        }
-
-        function renderRedirect(redirect) {
-          const type = redirect.resultType === "funding" ? "Funding" : "Repair";
-
-          // Show "Demo" when using demo ID
-          resultTypeEl.textContent = ref === "demo123" ? `${type} • Demo` : type;
-
-          resultTypeEl.style.background =
-            redirect.resultType === "funding"
-              ? "rgba(94,234,212,0.15)"
-              : "rgba(248,113,113,0.15)";
-
-          resultTypeEl.style.color =
-            redirect.resultType === "funding" ? "#5eead4" : "#fca5a5";
-
-          const days = Number(redirect.daysRemaining ?? 0);
-          setText("nextUpload", days > 0 ? `${days} days` : "Now");
-
-          setText(
-            "lastUpload",
-            redirect.lastUpload
-              ? new Date(redirect.lastUpload).toLocaleDateString()
-              : "—"
-          );
-
-          const summary =
-            redirect.resultType === "funding"
-              ? "You are fundable. Review your steps and share your link below."
-              : "We have a repair plan for you. Follow the steps and share your link.";
-
-          setText("summaryText", summary);
-
-          const list = document.getElementById("suggestions");
-          list.innerHTML = "";
-          (redirect.suggestions || []).forEach((item) => {
-            const li = document.createElement("li");
-            li.innerHTML = `<strong>${item.title}:</strong> ${item.description}`;
-            list.appendChild(li);
-          });
-
-          const link =
-            redirect.affiliateLink ||
-            `/credit-analyzer.html?ref=${encodeURIComponent(redirect.refId || ref)}`;
-
-          setText("affiliateLinkLabel", link);
-
-          const shareBtn = document.getElementById("shareBtn");
-          if (shareBtn) shareBtn.dataset.link = link;
-
-          content.style.display = "block";
-        }
-
-       function renderStats(stats) {
-  const placeholder = {
-    tier1_earnings: 1240,
-    tier2_earnings: 320,
-    total_earnings: 1560,
-    tier1_referrals_count: 14,
-    tier2_referrals_count: 5
-  };
-
-  // Detect if API returned REAL numbers or EMPTY numbers
-  const apiLooksEmpty =
-    !stats ||
-    (
-      stats.tier1_earnings === 0 &&
-      stats.tier2_earnings === 0 &&
-      stats.total_earnings === 0 &&
-      stats.tier1_referrals_count === 0 &&
-      stats.tier2_referrals_count === 0
-    );
-
-  const useStats = apiLooksEmpty ? placeholder : stats;
-
-  if (apiLooksEmpty) {
-    warningEl.style.display = "block";
-    warningEl.textContent =
-      "Showing sample data — live referral stats will appear once the system is connected.";
-  }
-
-  setText("tier1Earnings", `$${useStats.tier1_earnings.toLocaleString()}`);
-  setText("tier2Earnings", `$${useStats.tier2_earnings.toLocaleString()}`);
-  setText("totalEarnings", `$${useStats.total_earnings.toLocaleString()}`);
-  setText("tier1Count", useStats.tier1_referrals_count);
-  setText("tier2Count", useStats.tier2_referrals_count);
-
-  const setWidth = (id, val) => {
-    const el = document.getElementById(id);
-    if (el) el.style.width = `${pct(val)}%`;
-  };
-
-  setWidth("tier1Progress", useStats.tier1_earnings);
-  setWidth("tier2Progress", useStats.tier2_earnings);
-  setWidth("totalProgress", useStats.total_earnings);
-  setWidth("tier1CountBar", useStats.tier1_referrals_count);
-  setWidth("tier2CountBar", useStats.tier2_referrals_count);
-}
-
-        // ------------------------------------------------------------
-        // SHARE BUTTON
-        // ------------------------------------------------------------
-        function bindShare(defaultLink) {
-          const btn = document.getElementById("shareBtn");
-          const status = document.getElementById("shareStatus");
-
-          if (!btn) return;
-
-          btn.onclick = async () => {
-            const finalLink = btn.dataset.link || defaultLink;
-
-            try {
-              if (navigator.share) {
-                await navigator.share({
-                  title: "FundHub Referral",
-                  url: finalLink
-                });
-                status.textContent = "Shared!";
-              } else if (navigator.clipboard?.writeText) {
-                await navigator.clipboard.writeText(finalLink);
-                status.textContent = "Link copied.";
-              } else {
-                status.textContent = finalLink;
-              }
-            } catch {
-              status.textContent = "Unable to share right now.";
-            }
+        if (!data || !data.ok || !data.redirect) {
+          // Placeholder ONLY when API fails
+          return {
+            resultType: "funding",
+            score: 732,
+            util: 18,
+            inqEx: 2,
+            inqTu: 1,
+            inqEq: 0,
+            personalTotal: 45000,
+            businessTotal: 90000,
+            totalCombined: 135000,
+            neg: 2,
+            late: 1,
+            suggestions: [
+              "Keep each card under ~10% utilization for the best approvals.",
+              "Clean old addresses and employers so lenders see one clear profile.",
+              "Avoid new inquiries while you’re preparing for a funding round."
+            ],
+            refId: ref
           };
         }
+        return data.redirect;
+      }
 
-        // ------------------------------------------------------------
-        // MAIN
-        // ------------------------------------------------------------
-        (async function run() {
-          // Redirect data
-          const redirect = await loadRedirect();
-          renderRedirect(redirect);
+      // FUNDING SUMMARY RENDER ----------------------------------------------
+      function renderFundingSummary(redirect) {
+        fundingSummaryEl.style.display = "block";
+        repairSummaryEl.style.display  = "none";
 
-          // Bind share button
-          bindShare(
-            redirect.affiliateLink ||
-            `/credit-analyzer.html?ref=${encodeURIComponent(ref)}`
-          );
+        summarySubtitleEl.textContent =
+          "This is the funding approval you received from your last analyzer upload.";
 
-          // Stats
-          const statsResp = await fetchJson(
-            `${API_BASE}/api/lite/affiliate-stats?ref=${encodeURIComponent(ref)}`
-          );
+        const personal = num(redirect.personalTotal);
+        const business = num(redirect.businessTotal);
+        const total    = num(redirect.totalCombined || personal + business);
 
-          if (statsResp && statsResp.stats) {
-            renderStats(statsResp.stats);
+        const score = redirect.score || "--";
+        const util  = num(redirect.util);
+        const inqEx = num(redirect.inqEx);
+        const inqTu = num(redirect.inqTu);
+        const inqEq = num(redirect.inqEq);
+
+        // Badge
+        const badgeText = ref === "demo123" ? "Funding • Demo" : "Funding";
+        resultTypeEl.textContent = badgeText;
+        resultTypeEl.style.background = "rgba(56,189,248,0.18)";
+        resultTypeEl.style.color = "#7dd3fc";
+
+        // Numbers + animations
+        const pill = document.getElementById("totalFundingPill").querySelector("span");
+        animateMoney(pill,  total, "", 1500);
+        animateMoney(document.getElementById("personalFundingVal"), personal, null, 1300);
+        animateMoney(document.getElementById("businessFundingVal"), business, null, 1300);
+
+        setText("scoreCardVal", score);
+        setText("utilCardVal", util + "%");
+        setText("inqCardVal", "EX " + inqEx + " • TU " + inqTu + " • EQ " + inqEq);
+
+        const sugList = document.getElementById("fundingSuggestions");
+        const suggestions = Array.isArray(redirect.suggestions) ? redirect.suggestions : [];
+        if (sugList) {
+          if (suggestions.length) {
+            sugList.innerHTML = suggestions.map(t => "<li>" + t + "</li>").join("");
           } else {
-            renderStats({});
+            sugList.innerHTML = "<li>Use your approvals within 30–45 days for the best results.</li>";
           }
-        })();
+        }
+      }
+
+      // REPAIR SUMMARY RENDER -----------------------------------------------
+      function renderRepairSummary(redirect) {
+        fundingSummaryEl.style.display = "none";
+        repairSummaryEl.style.display  = "block";
+
+        summarySubtitleEl.textContent =
+          "This is the repair plan and funding potential from your last analyzer upload.";
+
+        const neg   = num(redirect.negatives ?? redirect.neg);
+        const late  = num(redirect.late);
+        const score = redirect.score || "--";
+
+        const personal = num(redirect.personalTotal);
+        const business = num(redirect.businessTotal);
+        const total    = num(redirect.totalCombined || personal + business);
+
+        // Badge
+        const badgeText = ref === "demo123" ? "Repair • Demo" : "Repair";
+        resultTypeEl.textContent = badgeText;
+        resultTypeEl.style.background = "rgba(248,113,113,0.20)";
+        resultTypeEl.style.color = "#fecaca";
+
+        setText("negativesVal",
+          neg + " item" + (neg === 1 ? "" : "s") + " flagged");
+        setText("latePaymentsVal",
+          late + " account" + (late === 1 ? "" : "s") + " with lates");
+        setText("scoreRepairVal", "Score: " + score);
+
+        animateMoney(document.getElementById("repairPersonalAmt"), personal, null, 1300);
+        animateMoney(document.getElementById("repairBusinessAmt"), business, null, 1300);
+        animateMoney(
+          document.getElementById("repairTotalLine"),
+          total,
+          "Total Funding Potential After Repair: %VAL%",
+          1500
+        );
+
+        const tipsEl = document.getElementById("repairTipsList");
+        const suggestions = Array.isArray(redirect.suggestions) ? redirect.suggestions : [];
+        if (tipsEl) {
+          if (suggestions.length) {
+            tipsEl.innerHTML = suggestions.map(t => "<li>" + t + "</li>").join("");
+          } else {
+            const fallback = [
+              "Keep each credit card under ~10% utilization for faster score gains.",
+              "Remove any authorized user cards with high balances.",
+              "Clean old addresses/employers before the next funding round.",
+              "Avoid new inquiries while repair is in progress."
+            ];
+            tipsEl.innerHTML = fallback.map(t => "<li>" + t + "</li>").join("");
+          }
+        }
+      }
+
+      // REFERRAL STATS -------------------------------------------------------
+      function renderStats(stats, warning, usePlaceholder) {
+        const placeholder = {
+          tier1_earnings: 1240,
+          tier2_earnings: 320,
+          total_earnings: 1560,
+          tier1_referrals_count: 14,
+          tier2_referrals_count: 5
+        };
+
+        const s = usePlaceholder ? placeholder : {
+          tier1_earnings: num(stats && stats.tier1_earnings),
+          tier2_earnings: num(stats && stats.tier2_earnings),
+          total_earnings: num(stats && stats.total_earnings),
+          tier1_referrals_count: num(stats && stats.tier1_referrals_count),
+          tier2_referrals_count: num(stats && stats.tier2_referrals_count)
+        };
+
+        if (warning) {
+          warningEl.style.display = "block";
+          warningEl.textContent = warning;
+        } else if (usePlaceholder) {
+          warningEl.style.display = "block";
+          warningEl.textContent =
+            "Showing sample referral stats — live data will appear when the system is connected.";
+        }
+
+        setText("tier1Earnings", "$" + s.tier1_earnings.toLocaleString());
+        setText("tier2Earnings", "$" + s.tier2_earnings.toLocaleString());
+        setText("totalEarnings", "$" + s.total_earnings.toLocaleString());
+        setText("tier1Count", s.tier1_referrals_count);
+        setText("tier2Count", s.tier2_referrals_count);
+
+        animateBar(document.getElementById("tier1Progress"),    pctForBar(s.tier1_earnings));
+        animateBar(document.getElementById("tier2Progress"),    pctForBar(s.tier2_earnings));
+        animateBar(document.getElementById("totalProgress"),    pctForBar(s.total_earnings));
+        animateBar(document.getElementById("tier1CountBar"),    pctForBar(s.tier1_referrals_count));
+        animateBar(document.getElementById("tier2CountBar"),    pctForBar(s.tier2_referrals_count));
+      }
+
+      // SHARE BUTTON ---------------------------------------------------------
+      function bindShare(defaultLink) {
+        const btn    = document.getElementById("shareBtn");
+        const status = document.getElementById("shareStatus");
+        if (!btn || !status) return;
+
+        btn.onclick = async () => {
+          const finalLink = btn.dataset.link || defaultLink || "/credit-analyzer.html";
+
+          try {
+            if (navigator.share) {
+              await navigator.share({ title: "FundHub Referral", url: finalLink });
+              status.textContent = "Shared!";
+            } else if (navigator.clipboard?.writeText) {
+              await navigator.clipboard.writeText(finalLink);
+              status.textContent = "Link copied.";
+            } else {
+              status.textContent = finalLink;
+            }
+          } catch {
+            status.textContent = "Unable to share right now.";
+          }
+        };
+      }
+
+      // MAIN -----------------------------------------------------------------
+      (async function run() {
+        const redirect = await loadRedirect();
+
+        const type = (redirect.resultType || "").toLowerCase();
+        if (type === "repair") {
+          renderRepairSummary(redirect);
+        } else {
+          renderFundingSummary(redirect);
+        }
+
+        const affiliateLink =
+          redirect.affiliateLink ||
+          (redirect.refId ? "/credit-analyzer.html?ref=" + encodeURIComponent(redirect.refId)
+                          : "/credit-analyzer.html?ref=" + encodeURIComponent(ref));
+
+        const shareBtn = document.getElementById("shareBtn");
+        if (shareBtn) shareBtn.dataset.link = affiliateLink;
+        bindShare(affiliateLink);
+
+        const statsResp = await fetchJson(
+          API_BASE + "/api/lite/affiliate-stats?ref=" + encodeURIComponent(ref)
+        );
+
+        if (!statsResp) {
+          // API fail => placeholders
+          renderStats(null, null, true);
+        } else if (statsResp.stats) {
+          renderStats(statsResp.stats, statsResp.warning || null, false);
+        } else {
+          // Response but no stats object – treat as fail for placeholders
+          renderStats(null, statsResp.warning || null, true);
+        }
       })();
-    </script>
-  </div>
+    })();
+  </script>
 </body>
 </html>
