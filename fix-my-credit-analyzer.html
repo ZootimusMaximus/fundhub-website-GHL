@@ -5,6 +5,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Fix My Credit | FundHub</title>
+<script src="./config.js"></script>
+<script>
+if (!window.__apiConfig) {
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  window.__apiConfig = { IS_LOCAL: isLocal, API_BASE: isLocal ? 'http://localhost:3000' : 'https://underwrite-iq-lite.vercel.app' };
+}
+</script>
 
 <style>
 /* ————————————————————————————————
@@ -405,7 +412,7 @@ p.sub{
   /* ===========================
       SHARE BUTTON + AFFILIATE CREATION
   ============================ */
-  const API_BASE = "https://underwrite-iq-lite.vercel.app";
+  const API_BASE = window.__apiConfig.API_BASE;
   const shareBtn = document.getElementById("shareBtn");
   const shareStatus = document.getElementById("shareStatus");
 
