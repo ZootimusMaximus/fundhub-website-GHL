@@ -1215,6 +1215,21 @@ document.addEventListener("DOMContentLoaded", function () {
             window.__uwiq.saveLastResult(dashboardUrl || resultUrl, refId, redirect.daysRemaining);
           }
 
+          // Store user data for share/affiliate functionality on results pages
+          try {
+            const nameInput = byId("fh_name");
+            const emailInput = byId("fh_email");
+            const phoneInput = byId("fh_phone");
+            const bizInput = byId("fh_biz");
+            localStorage.setItem("uwiq_user_data", JSON.stringify({
+              name: nameInput ? nameInput.value : "",
+              email: emailInput ? emailInput.value : "",
+              phone: phoneInput ? phoneInput.value : "",
+              businessName: bizInput ? bizInput.value : "",
+              refId: refId || ""
+            }));
+          } catch (_) {}
+
           const target = dashboardUrl || resultUrl || "/";
 
           setTimeout(() => {

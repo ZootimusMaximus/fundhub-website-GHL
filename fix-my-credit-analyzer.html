@@ -235,6 +235,11 @@ p.sub{
     Fix My Credit Now
   </a>
 
+  <button class="btn share-btn" id="shareBtn" style="margin-top:16px; background:linear-gradient(135deg,#22c55e,#16a34a);">
+    📤 Share & Earn Referrals
+  </button>
+  <div id="shareStatus" style="margin-top:8px; font-size:14px; color:#475569;"></div>
+
   <div class="fundBox" id="fundBox">
     <h2 style="font-size:28px;font-weight:900;margin-bottom:6px;">
       Your Funding Potential After Credit Repair
@@ -396,6 +401,74 @@ p.sub{
   }
 
   run();
+
+  /* ===========================
+      SHARE BUTTON + AFFILIATE CREATION
+  ============================ */
+  const API_BASE = "https://underwrite-iq-lite.vercel.app";
+  const shareBtn = document.getElementById("shareBtn");
+  const shareStatus = document.getElementById("shareStatus");
+
+  // Get user data from localStorage (stored by credit-analyzer)
+  const storedData = JSON.parse(localStorage.getItem("uwiq_user_data") || "{}");
+  const refId = params.get("refId") || storedData.refId || null;
+
+  if (shareBtn) {
+    shareBtn.onclick = async function() {
+      shareStatus.textContent = "Creating your referral link...";
+      shareBtn.disabled = true;
+
+      try {
+        // Call create-affiliate endpoint
+        const resp = await fetch(`${API_BASE}/api/lite/create-affiliate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: storedData.email || "",
+            phone: storedData.phone || "",
+            name: storedData.name || "",
+            refId: refId,
+            businessName: storedData.businessName || ""
+          })
+        });
+
+        const result = await resp.json();
+
+        if (!result.ok) {
+          shareStatus.textContent = result.msg || "Could not create referral link.";
+          shareBtn.disabled = false;
+          return;
+        }
+
+        const shareUrl = result.referralUrl || `https://fundhub.ai/credit-analyzer.html?ref=${refId}`;
+        const shareText = "Check out FundHub to see your funding potential:";
+
+        // Try native share first, fallback to clipboard
+        if (navigator.share) {
+          await navigator.share({
+            title: "FundHub - Check Your Funding",
+            text: shareText,
+            url: shareUrl
+          });
+          shareStatus.textContent = "Shared successfully! 🎉";
+        } else if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(shareUrl);
+          shareStatus.textContent = "Link copied to clipboard! 📋";
+        } else {
+          shareStatus.textContent = shareUrl;
+        }
+
+        // Update button to show success
+        shareBtn.textContent = "✅ Share Again";
+        shareBtn.disabled = false;
+
+      } catch (err) {
+        console.error("Share error:", err);
+        shareStatus.textContent = "Share cancelled or failed.";
+        shareBtn.disabled = false;
+      }
+    };
+  }
 
 })();
 </script>
