@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Referral Dashboard | FundHub</title>
+  <script src="./config.js"></script>
+  <script>
+  if (!window.__apiConfig) {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    window.__apiConfig = { IS_LOCAL: isLocal, API_BASE: isLocal ? 'http://localhost:3000' : 'https://underwrite-iq-lite.vercel.app' };
+  }
+  </script>
   <link rel="stylesheet" href="/css/global.css">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/repair.css">
@@ -129,7 +136,7 @@
 
       const params = new URLSearchParams(window.location.search || "");
       const ref = params.get("ref");
-      const API_BASE = "https://underwrite-iq-lite.vercel.app";
+      const API_BASE = window.__apiConfig.API_BASE;
 
       const content = document.getElementById("content");
       const emptyState = document.getElementById("emptyState");

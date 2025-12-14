@@ -5,6 +5,18 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Free Credit Analyzer | FundHub</title>
+<script src="./config.js"></script>
+<script>
+// Fallback if config.js fails to load
+if (!window.__apiConfig) {
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  window.__apiConfig = {
+    IS_LOCAL: isLocal,
+    API_BASE: isLocal ? 'http://localhost:3000' : 'https://underwrite-iq-lite.vercel.app'
+  };
+  console.warn('[config] Using inline fallback config');
+}
+</script>
 
 <style>
 :root{
@@ -646,7 +658,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const errorBox = document.getElementById("errorBox");
 
   // ✅ Use switchboard (correct orchestrator)
-  const ANALYZER_URL = "https://underwrite-iq-lite.vercel.app/api/lite/switchboard";
+  const ANALYZER_URL = window.__apiConfig.API_BASE + "/api/lite/switchboard";
 
   function showError(msg) {
     errorBox.style.display = "block";
@@ -795,9 +807,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const byId = id => document.getElementById(id);
 
   /* ---------------------------
-        CORRECT BACKEND URL
+        BACKEND URL (from centralized config)
   ----------------------------*/
-  const API_BASE = "https://underwrite-iq-lite.vercel.app";
+  const API_BASE = window.__apiConfig.API_BASE;
 
   /* ---------------------------
         ROTATING HEADLINE
@@ -1214,6 +1226,21 @@ document.addEventListener("DOMContentLoaded", function () {
           if (window.__uwiq && typeof window.__uwiq.saveLastResult === "function") {
             window.__uwiq.saveLastResult(dashboardUrl || resultUrl, refId, redirect.daysRemaining);
           }
+
+          // Store user data for share/affiliate functionality on results pages
+          try {
+            const nameInput = byId("fh_name");
+            const emailInput = byId("fh_email");
+            const phoneInput = byId("fh_phone");
+            const bizInput = byId("fh_biz");
+            localStorage.setItem("uwiq_user_data", JSON.stringify({
+              name: nameInput ? nameInput.value : "",
+              email: emailInput ? emailInput.value : "",
+              phone: phoneInput ? phoneInput.value : "",
+              businessName: bizInput ? bizInput.value : "",
+              refId: refId || ""
+            }));
+          } catch (_) {}
 
           const target = dashboardUrl || resultUrl || "/";
 
