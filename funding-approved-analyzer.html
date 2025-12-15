@@ -209,7 +209,7 @@ section, .section, .row, .wrapper, .container,
     <div class="card"><h3>Inquiries</h3><p id="inqCardVal">EX 0 • TU 0 • EQ 0</p></div>
   </div>
 
-  <a class="btn" href="https://fundhub.ai/funding-form-748297">Book Your Funding Review</a>
+  <a class="btn" href="/funding-form-748297">Book Your Funding Review</a>
 
   <button class="btn share-btn" id="shareBtn" style="margin-top:16px; background:linear-gradient(135deg,#22c55e,#16a34a);">
     📤 Share & Earn Referrals
@@ -259,7 +259,7 @@ section, .section, .row, .wrapper, .container,
   const optList = document.getElementById("optList");
 
   /* ===========================
-      FUNDING VALUES (FIXED)
+      FUNDING VALUES
       Using redirect.query fields:
       - personalTotal
       - businessTotal
@@ -269,11 +269,10 @@ section, .section, .row, .wrapper, .container,
   const businessFromUrl = getNum(params.get("businessTotal"));
   const combinedFromUrl = getNum(params.get("totalCombined"));
 
-  const USE_MOCK = (!personalFromUrl && !businessFromUrl && !combinedFromUrl);
-
-  const personalTarget = USE_MOCK ? 45000 : personalFromUrl;
-  const businessTarget = USE_MOCK ? 90000 : businessFromUrl;
-  const totalTarget    = USE_MOCK ? 135000 : (combinedFromUrl || (personalTarget + businessTarget));
+  // Use real values only - no mock/placeholder data
+  const personalTarget = personalFromUrl;
+  const businessTarget = businessFromUrl;
+  const totalTarget    = combinedFromUrl || (personalTarget + businessTarget);
 
   /* ===========================
       COUNTERS

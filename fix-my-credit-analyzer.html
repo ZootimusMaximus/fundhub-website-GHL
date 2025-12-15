@@ -238,7 +238,7 @@ p.sub{
     </div>
   </div>
 
-  <a class="btn" id="ctaButton" href="https://fundhub.ai/repair-survey-842022" target="_blank">
+  <a class="btn" id="ctaButton" href="/repair-survey-842022" target="_blank">
     Fix My Credit Now
   </a>
 
@@ -307,19 +307,15 @@ p.sub{
 
   document.getElementById("scoreVal").textContent = `Score: ${score}`;
 
-  /* ——— FIXED FUNDING PARAMETER NAMES ——— */
-  const personalFromUrl = getNum(params.get("personalTotal"));   // FIXED
-  const businessFromUrl = getNum(params.get("businessTotal"));   // FIXED
-  const totalFromUrl    = getNum(params.get("totalCombined"));   // FIXED
+  /* ——— FUNDING PARAMETER NAMES ——— */
+  const personalFromUrl = getNum(params.get("personalTotal"));
+  const businessFromUrl = getNum(params.get("businessTotal"));
+  const totalFromUrl    = getNum(params.get("totalCombined"));
 
-  const usePlaceholders =
-    (!personalFromUrl && !businessFromUrl && !totalFromUrl);
-
-  const personalTarget = usePlaceholders ? 200000 : personalFromUrl;
-  const businessTarget = usePlaceholders ? 200000 : businessFromUrl;
-  const totalTarget    = usePlaceholders
-      ? 400000
-      : (totalFromUrl || personalTarget + businessTarget);
+  // Use real values only - no mock/placeholder data
+  const personalTarget = personalFromUrl;
+  const businessTarget = businessFromUrl;
+  const totalTarget    = totalFromUrl || (personalTarget + businessTarget);
 
   const personalAmtEl = document.getElementById("personalAmt");
   const businessAmtEl = document.getElementById("businessAmt");

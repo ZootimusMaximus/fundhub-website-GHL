@@ -407,6 +407,29 @@ button.submit.loading{
   pointer-events:none;
   box-shadow:none;
 }
+
+/* Loading status text */
+.loading-status{
+  text-align:center;
+  margin-top:12px;
+  color:rgba(255,255,255,.9);
+  font-size:14px;
+  min-height:20px;
+}
+.loading-status .status-text{
+  display:inline-block;
+  animation:pulse 1.5s ease-in-out infinite;
+}
+.loading-status .time-hint{
+  display:block;
+  margin-top:4px;
+  font-size:12px;
+  color:rgba(255,255,255,.6);
+}
+@keyframes pulse{
+  0%,100%{opacity:1;}
+  50%{opacity:.6;}
+}
   
 /* M J submit button and file selector button */
 #fh_file::file-selector-button:hover{
@@ -568,7 +591,7 @@ small.hint{color:rgba(255,255,255,.7);}
 <!-- M J changed class and id, img -->
 <header class="site-header" id="site-header">
   <div class="header-inner">
-    <a class="brand" href="https://fundhub.ai/start-here">
+    <a class="brand" href="/start-here">
       <img class="logo-dark"  src="https://storage.googleapis.com/msgsndr/ORh91GeY4acceSASSnLR/media/68c82a9b57da562581fb8828.png" alt="FundHub">
       <img class="logo-light" src="https://storage.googleapis.com/msgsndr/ORh91GeY4acceSASSnLR/media/68c834144f724eae4137ce4c.png" alt="FundHub">
     </a>
@@ -634,6 +657,8 @@ small.hint{color:rgba(255,255,255,.7);}
       <button class="submit" id="fh_analyze" type="button">
         <span>Analyze My Report</span>
       </button>
+
+      <div id="loadingStatus" class="loading-status"></div>
 
       <div class="credit-links">
         <a href="https://www.annualcreditreport.com/" target="_blank">Get Experian</a>
@@ -1071,22 +1096,39 @@ document.addEventListener("DOMContentLoaded", function () {
   /* ---------------------------
         BUTTON PROGRESS UI
   ----------------------------*/
+  function getStatusMessage(percent) {
+    if (percent < 20) return "Uploading report...";
+    if (percent < 50) return "Reading credit data...";
+    if (percent < 75) return "Analyzing tradelines...";
+    if (percent < 90) return "Calculating funding potential...";
+    if (percent < 100) return "Almost done...";
+    return "Complete!";
+  }
+
   function setProgress(percent) {
     const btn = byId("fh_analyze");
+    const statusEl = byId("loadingStatus");
     if (!btn) return;
     btn.classList.add("loading");
     btn.style.setProperty("--progress", percent + "%");
     const span = btn.querySelector("span");
     if (span) span.textContent = "Analyzing…";
+
+    if (statusEl) {
+      const msg = getStatusMessage(percent);
+      statusEl.innerHTML = `<span class="status-text">${msg}</span><span class="time-hint">This usually takes 15-30 seconds</span>`;
+    }
   }
 
   function resetButton() {
     const btn = byId("fh_analyze");
+    const statusEl = byId("loadingStatus");
     if (!btn) return;
     btn.classList.remove("loading");
     btn.style.setProperty("--progress", "0%");
     const span = btn.querySelector("span");
     if (span) span.textContent = "Analyze My Report";
+    if (statusEl) statusEl.innerHTML = "";
   }
 
   /* ---------------------------
